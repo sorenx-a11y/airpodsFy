@@ -35,6 +35,15 @@ workflows:
             CODE_SIGN_IDENTITY="" \
             CODE_SIGN_ENTITLEMENTS="" \
             CODE_SIGNING_ENTITLEMENTS_REQUIRED=NO
+      - name: Verify launch screen in built app
+        script: |
+          set -e
+          APP_PATH=$(find build/App.xcarchive/Products/Applications -maxdepth 1 -name "*.app" | head -1)
+          echo "== Info.plist keys =="
+          plutil -p "$APP_PATH/Info.plist" | grep -Ei "UILaunch|UIDeviceFamily|MinimumOSVersion|DTSDKName|UIRequiresFullScreen" || true
+          echo "== Compiled launch screen bundle =="
+          ls -la "$APP_PATH" | grep -i launchscreen || true
+          test -d "$APP_PATH/LaunchScreen.storyboardc"
       - name: Package unsigned IPA (Payload/.app)
         script: |
           set -e
