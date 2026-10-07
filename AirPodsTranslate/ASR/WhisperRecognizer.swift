@@ -14,8 +14,6 @@ final class WhisperRecognizer: SpeechRecognizing {
             do {
                 let config = WhisperKitConfig(
                     model: "openai_whisper-tiny",
-                    computeOptions: ComputeOptions(audioEncoderCompute: .neuralEngine,
-                                                   textDecoderCompute: .neuralEngine),
                     verbose: false
                 )
                 let kit = try await WhisperKit(config)
@@ -42,22 +40,21 @@ final class WhisperRecognizer: SpeechRecognizing {
         let language = Self.whisperLanguage(from: hintLanguageCode)
         let options = DecodingOptions(
             language: language,
-            detectLanguage: language == nil,
-            vad: false   // 我们已用自研 VAD 截句
+            detectLanguage: language == nil
         )
 
         let result: TranscriptionResult? = try await whisper.transcribe(
             audioPath: wavURL.path,
             decodeOptions: options
         )
-        guard let text = result?.text?
+        guard let text = result?.text
             .trimmingCharacters(in: .whitespacesAndNewlines),
               !text.isEmpty else {
             throw ASRError.emptyResult
         }
 
         return ASRResult(text: text,
-                         detectedLanguageCode: result?.language.flatMap(Self.localeCode(fromWhisper:)))
+                         detectedLanguageCode: result?.language.flatMap { Self.localeCode(fromWhisper: $0) })
     }
 
     // zh → zh-Hans，en → en

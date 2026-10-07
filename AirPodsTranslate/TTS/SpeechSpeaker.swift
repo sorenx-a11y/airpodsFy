@@ -9,7 +9,7 @@ final class SpeechSpeaker: NSObject {
     static let shared = SpeechSpeaker()
 
     private let synthesizer = AVSpeechSynthesizer()
-    private var continuation: CheckedContinuation<Void, Never>?
+    private var continuation: CheckedContinuation<Bool, Never>?
     private(set) var isSpeaking = false
 
     /// 当前播出的文本（UI 高亮用）
@@ -66,7 +66,7 @@ final class SpeechSpeaker: NSObject {
         self.continuation = nil
         isSpeaking = false
         speakingText = nil
-        continuation.resume(returning: spokenCompletely)
+        continuation.resume(returning: spokeCompletely)
     }
 
     // zh-Hans → zh-CN；en → en-US（可用已下载的增强语音）

@@ -3,7 +3,7 @@ workflows:
     name: iOS Build
     max_build_duration: 120
     environment:
-      xcode: 16.0
+      xcode: latest
       cocoapods: default
       vars:
         XCODE_PROJECT: "AirPodsTranslate.xcodeproj"

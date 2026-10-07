@@ -33,7 +33,7 @@ struct ModeHomeView: View {
                 } label: {
                     Image(systemName: "arrow.left.arrow.right")
                         .font(.title3)
-                        .foregroundStyle(.brand)
+                        .foregroundStyle(Color.brand)
                         .frame(width: 44, height: 44)
                 }
                 .buttonStyle(.plain)
@@ -72,7 +72,7 @@ struct ModeHomeView: View {
                         ZStack {
                             Image(systemName: mode.iconName)
                                 .font(.title2)
-                                .foregroundStyle(.brand)
+                                .foregroundStyle(Color.brand)
                                 .frame(width: 52, height: 52)
                         }
                         .glassTinted(Color.brand, cornerRadius: 14)
