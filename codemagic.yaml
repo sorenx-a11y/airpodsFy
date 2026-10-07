@@ -1,13 +1,13 @@
 workflows:
-  ios-ipa:
-    name: iOS IPA → TestFlight
+  ios-ipa-unsigned:
+    name: iOS Unsigned IPA
     max_build_duration: 120
     environment:
       xcode: 26.5
       vars:
         XCODE_PROJECT: "AirPodsTranslate.xcodeproj"
         XCODE_SCHEME: "AirPodsTranslate"
-        BUNDLE_ID: "com.airpodstranslate.app"
+        APP_NAME: "AirPodsTranslate"
     cache:
       cache_paths:
         - $CM_BUILD_DIR/.build
@@ -18,25 +18,34 @@ workflows:
         script: brew install xcodegen
       - name: Generate Xcode project
         script: xcodegen generate
-      - name: Set up automatic code signing
-        script: |
-          keychain initialize
-          app-store-connect fetch-signing-files "$BUNDLE_ID" \
-            --type IOS_APP_STORE \
-            --certificate-key "$APP_STORE_CONNECT_PRIVATE_KEY"
-          keychain add-certificates
-          xcode-project use-profiles
       - name: Resolve Swift Package dependencies
         script: xcodebuild -project "$XCODE_PROJECT" -scheme "$XCODE_SCHEME" -resolvePackageDependencies
-      - name: Build IPA (archive + export)
+      - name: Archive without code signing
         script: |
-          xcode-project build-ipa \
-            --project "$XCODE_PROJECT" \
-            --scheme "$XCODE_SCHEME"
+          set -e
+          rm -rf build
+          xcodebuild archive \
+            -project "$XCODE_PROJECT" \
+            -scheme "$XCODE_SCHEME" \
+            -configuration Release \
+            -destination "generic/platform=iOS" \
+            -archivePath "build/App.xcarchive" \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGN_ENTITLEMENTS="" \
+            CODE_SIGNING_ENTITLEMENTS_REQUIRED=NO
+      - name: Package unsigned IPA (Payload/.app)
+        script: |
+          set -e
+          APP_PATH=$(find build/App.xcarchive/Products/Applications -maxdepth 1 -name "*.app" | head -1)
+          echo "Found app: $APP_PATH"
+          rm -rf Payload
+          mkdir Payload
+          cp -r "$APP_PATH" Payload/
+          zip -qry "build/${APP_NAME}-unsigned.ipa" Payload
+          rm -rf Payload
+          echo "Built: build/${APP_NAME}-unsigned.ipa"
     artifacts:
-      - build/ios/ipa/*.ipa
-    publishing:
-      app_store_connect:
-        api_key: $APP_STORE_CONNECT_PRIVATE_KEY
-        key_id: $APP_STORE_CONNECT_KEY_IDENTIFIER
-        issuer_id: $APP_STORE_CONNECT_ISSUER_ID
+      - build/*.ipa
+      - build/App.xcarchive
