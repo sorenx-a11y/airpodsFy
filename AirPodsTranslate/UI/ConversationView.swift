@@ -63,17 +63,27 @@ struct ConversationView: View {
             .glassCircle()
 
             VStack(alignment: .leading, spacing: 2) {
-                Text(mode.title).font(.headline)
-                Text(orchestrator?.headphone.routeName ?? "音频路由")
-                    .font(.caption2)
-                    .foregroundStyle(.secondary)
+                Text(mode.title).font(.system(size: 16.5, weight: .bold))
+                HStack(spacing: 4) {
+                    Image(systemName: "headphones")
+                        .font(.system(size: 10))
+                    Text(subtitleRoute)
+                        .font(.system(size: 10.5))
+                }
+                .foregroundStyle(.secondary)
             }
             .padding(.leading, 4)
 
             Spacer()
         }
-        .padding(.horizontal)
+        .padding(.horizontal, 16)
         .padding(.top, 8)
+    }
+
+    private var subtitleRoute: String {
+        let route = orchestrator?.headphone.routeName ?? "音频路由"
+        let strategy = mode == .listening ? "耳机麦 HFP" : settings.routeStrategy.title
+        return "\(route) · \(strategy)"
     }
 
     private var statusBar: some View {
@@ -106,11 +116,28 @@ struct ConversationView: View {
         case .idle:        "待机"
         case .preparing:   "准备中…"
         case .listening:   "聆听中"
-        case .processing:  "翻译中…"
+        case .processing:  "识别翻译中"
         case .speaking:    "朗读中"
         case .interrupted: "已打断"
         case .error(let m): m
         }
+    }
+
+    private var emptyState: some View {
+        VStack(spacing: 10) {
+            Image(systemName: mode == .listening ? "ear.fill" : "bubble.left.and.bubble.right.fill")
+                .font(.system(size: 46))
+                .foregroundStyle(.tertiary)
+            Text(mode == .listening ? "把手机放兜里，戴着耳机听即可" : "戴上 AirPods，开始说话即可")
+                .font(.system(size: 16, weight: .semibold))
+            Text(mode == .listening
+                 ? "对方说完后译文自动在耳机朗读"
+                 : "系统自动分栏，译文朗读并显示双语字幕")
+                .font(.system(size: 12.5))
+                .foregroundStyle(.secondary)
+                .multilineTextAlignment(.center)
+        }
+        .padding(.horizontal, 30)
     }
 
     // MARK: - 字幕区
@@ -120,12 +147,8 @@ struct ConversationView: View {
             ScrollView {
                 LazyVStack(spacing: 12) {
                     if orchestrator?.messages.isEmpty ?? true {
-                        ContentUnavailableView(
-                            "开始说话即可",
-                            systemImage: mode.iconName,
-                            description: Text(mode.subtitle)
-                        )
-                        .padding(.top, 60)
+                        emptyState
+                            .padding(.top, 80)
                     }
                     ForEach(orchestrator?.messages ?? []) { message in
                         MessageBubbleView(

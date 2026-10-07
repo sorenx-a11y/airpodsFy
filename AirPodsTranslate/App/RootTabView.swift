@@ -8,30 +8,26 @@ struct RootTabView: View {
     @State private var selection: Tab = .home
 
     var body: some View {
-        ZStack(alignment: .bottom) {
-            // 页面内容
-            Group {
-                switch selection {
-                case .home:     ModeHomeView()
-                case .history:  HistoryListView(wrapped: false)
-                case .settings: SettingsView()
-                }
+        Group {
+            switch selection {
+            case .home:     ModeHomeView()
+            case .history:  HistoryListView(wrapped: true)
+            case .settings: SettingsView()
             }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-
-            // 自定义液态玻璃 Tab Bar
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .safeAreaInset(edge: .bottom, spacing: 0) {
             customTabBar
                 .padding(.horizontal, 10)
-                .padding(.bottom, 10)
+                .padding(.top, 6)
         }
-        .ignoresSafeArea(.keyboard)
     }
 
-    // MARK: - 自定义底部 Tab Bar（选中项为圆角玻璃胶囊）
+    // MARK: - 自定义液态玻璃 Tab Bar（选中项为圆角玻璃胶囊）
 
     private var customTabBar: some View {
         HStack(spacing: 6) {
-            tabItem(.home, title: "对话", icon: "waveform.bubble.fill")
+            tabItem(.home, title: "对话", icon: "bubble.left.and.bubble.right.fill")
             tabItem(.history, title: "记录", icon: "clock.arrow.circlepath")
             tabItem(.settings, title: "设置", icon: "gearshape.fill")
         }
@@ -49,7 +45,7 @@ struct RootTabView: View {
         } label: {
             VStack(spacing: 3) {
                 Image(systemName: icon)
-                    .font(.system(size: 20, weight: .semibold))
+                    .font(.system(size: 21, weight: .semibold))
                 Text(title)
                     .font(.system(size: 10.5, weight: isSelected ? .semibold : .regular))
             }

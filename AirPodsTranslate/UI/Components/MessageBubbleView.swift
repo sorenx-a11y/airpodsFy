@@ -1,55 +1,78 @@
 import SwiftUI
 
+/// 通用译文字泡：原文小字 + 译文大字，液态玻璃材质。
+/// 会话页（ChatMessage）与记录详情页（MessageEntity）共用。
+struct TranslationBubble: View {
+    let speaker: Speaker
+    var source: String
+    var translation: String
+    var isProcessing: Bool = false
+    var isPlaying: Bool = false
+    var playEnabled: Bool = true
+    var onPlay: (() -> Void)?
+
+    private var accent: Color { speaker == .me ? Color.mine : Color.theirs }
+    private var isMe: Bool { speaker == .me }
+
+    var body: some View {
+        HStack(spacing: 7) {
+            if isMe {
+                Spacer(minLength: 24)
+                replayButton
+            }
+
+            VStack(alignment: isMe ? .trailing : .leading, spacing: 3) {
+                Text(source)
+                    .font(.system(size: 12.5))
+                    .foregroundStyle(.secondary)
+                Text(translation.isEmpty ? "翻译中…" : translation)
+                    .font(.system(size: 16.5, weight: .bold))
+                    .foregroundStyle(isProcessing || translation.isEmpty ? .secondary : .primary)
+                    .lineLimit(nil)
+            }
+            .frame(maxWidth: 280, alignment: isMe ? .trailing : .leading)
+            .padding(.horizontal, 14)
+            .padding(.vertical, 10)
+            .glassBubble(accent)
+
+            if !isMe {
+                replayButton
+                Spacer(minLength: 24)
+            }
+        }
+    }
+
+    private var replayButton: some View {
+        Button {
+            onPlay?()
+        } label: {
+            Image(systemName: isPlaying ? "speaker.wave.2.fill" : "play.fill")
+                .font(.system(size: isPlaying ? 16 : 15, weight: .bold))
+                .frame(width: 40, height: 40)
+        }
+        .buttonStyle(.plain)
+        .glassCircle(isPlaying ? accent : Color.primary.opacity(0.75))
+        .accessibilityLabel(isPlaying ? "正在播放" : "重新播放")
+        .disabled(!playEnabled)
+        .opacity(playEnabled ? 1 : 0.4)
+    }
+}
+
+/// 会话页气泡：绑定 ChatMessage
 struct MessageBubbleView: View {
     let message: ChatMessage
     var isPlaying: Bool = false
     var onPlay: (() -> Void)? = nil
 
     var body: some View {
-        HStack(spacing: 8) {
-            if message.speaker == .me {
-                Spacer(minLength: 28)
-                replayButton
-            }
-
-            VStack(alignment: message.speaker == .me ? .trailing : .leading, spacing: 4) {
-                Text(message.source)
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-                Text(message.translation.isEmpty ? "…" : message.translation)
-                    .font(.title3.bold())
-                    .foregroundStyle(.primary)
-            }
-            .padding(.horizontal, 14)
-            .padding(.vertical, 10)
-            .background(
-                message.speaker == .me
-                    ? Color.mine.opacity(0.14)
-                    : Color.theirs.opacity(0.14)
-            )
-            .clipShape(RoundedRectangle(cornerRadius: 18))
-
-            if message.speaker == .them {
-                replayButton
-                Spacer(minLength: 28)
-            }
-        }
-    }
-
-    /// 气泡旁的单条重播按钮（液态玻璃圆形）
-    private var replayButton: some View {
-        Button {
-            onPlay?()
-        } label: {
-            Image(systemName: isPlaying ? "speaker.wave.2.fill" : "play.fill")
-                .font(.system(size: 16, weight: .bold))
-                .frame(width: 40, height: 40)
-        }
-        .buttonStyle(.plain)
-        .glassCircle(isPlaying
-                     ? (message.speaker == .me ? Color.mine : Color.theirs)
-                     : Color.primary.opacity(0.75))
-        .accessibilityLabel(isPlaying ? "正在播放" : "重新播放")
-        .disabled(message.translation.isEmpty)
+        TranslationBubble(
+            speaker: message.speaker,
+            source: message.source,
+            translation: message.translation,
+            isProcessing: message.isProcessing,
+            isPlaying: isPlaying,
+            playEnabled: !message.translation.isEmpty,
+            onPlay: onPlay
+        )
     }
 }

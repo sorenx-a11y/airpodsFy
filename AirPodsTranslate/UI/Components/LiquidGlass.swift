@@ -19,6 +19,12 @@ extension View {
     func glassCircle(_ tint: Color = .primary.opacity(0.85)) -> some View {
         glassEffect(.regular.tint(tint).interactive(), in: Circle())
     }
+
+    /// 对话气泡：带说话方色调的液态玻璃
+    func glassBubble(_ accent: Color) -> some View {
+        glassEffect(.regular.tint(accent.opacity(0.16)).interactive(),
+                    in: .rect(cornerRadius: 19))
+    }
 }
 
 /// App 全局彩色底（液态玻璃的折射采样源，浅色/深色自适应）
