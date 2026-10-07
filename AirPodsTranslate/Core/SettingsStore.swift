@@ -115,7 +115,7 @@ final class SettingsStore {
 
     // TTS
     var ttsEnabled: Bool = true
-    var ttsRate: Float = AVSpeechDefaultRate * 1.05
+    var ttsRate: Float = AVSpeechUtteranceDefaultSpeechRate * 1.05
 
     // 引擎
     var asrEngine: ASREngineChoice = .whisperKit

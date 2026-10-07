@@ -60,7 +60,7 @@ struct SettingsView: View {
         Section("朗读") {
             Toggle("自动朗读译文", isOn: Bindable(settings).ttsEnabled)
             VStack {
-                Text("语速 \(Int(settings.ttsRate / AVSpeechDefaultRate * 100))%")
+                Text("语速 \(Int(settings.ttsRate / AVSpeechUtteranceDefaultSpeechRate * 100))%")
                 Slider(value: Bindable(settings).ttsRate,
                        in: AVSpeechUtteranceMinimumSpeechRate...AVSpeechUtteranceMaximumSpeechRate)
             }

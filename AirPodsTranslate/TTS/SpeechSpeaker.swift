@@ -15,7 +15,7 @@ final class SpeechSpeaker: NSObject {
     /// 当前播出的文本（UI 高亮用）
     var speakingText: String?
 
-    var rate: Float = AVSpeechDefaultRate
+    var rate: Float = AVSpeechUtteranceDefaultSpeechRate
     var volume: Float = 1.0
 
     override init() {
