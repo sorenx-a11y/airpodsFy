@@ -2,6 +2,7 @@ import Foundation
 import SwiftUI
 import SwiftData
 import Observation
+import AVFoundation
 
 struct ChatMessage: Identifiable, Equatable {
     let id: UUID

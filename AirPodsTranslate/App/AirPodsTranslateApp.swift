@@ -17,7 +17,7 @@ struct AirPodsTranslateApp: App {
     }
 }
 
-enum DataStack {
+struct DataStack {
     static let shared = DataStack()
 
     let container: ModelContainer = {
