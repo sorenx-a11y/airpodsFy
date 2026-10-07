@@ -1,0 +1,39 @@
+workflows:
+  ios-build:
+    name: iOS Build
+    environment:
+      xcode: 16.0
+      cocoapods: default
+      groups:
+        - app_store_credentials
+      vars:
+        BUNDLE_ID: "com.sorenx.airpodsfy"
+        XCODE_PROJECT: "AirPodsTranslate.xcodeproj"
+        XCODE_SCHEME: "AirPodsTranslate"
+    scripts:
+      - name: Install XcodeGen
+        script: brew install xcodegen
+      - name: Generate Xcode project
+        script: xcodegen generate
+      - name: Set up code signing
+        script: |
+          keychain initialize
+          keychain add-certificates
+          xcode-project use-profiles
+      - name: Resolve Swift Package dependencies
+        script: xcodebuild -project "$XCODE_PROJECT" -scheme "$XCODE_SCHEME" -resolvePackageDependencies
+      - name: Build IPA
+        script: |
+          xcode-project build-ipa \
+            --project "$XCODE_PROJECT" \
+            --scheme "$XCODE_SCHEME" \
+            --archive-xcargs "CODE_SIGN_STYLE=Manual DEVELOPMENT_TEAM=$DEVELOPER_TEAM"
+    artifacts:
+      - build/ios/ipa/*.ipa
+      - $HOME/Library/Developer/Xcode/DerivedData/**/Build/**/*.dSYM
+    publishing:
+      email:
+        recipients:
+          - $EMAIL
+      app_store_connect:
+        api_key: $APP_STORE_CONNECT_API_KEY
