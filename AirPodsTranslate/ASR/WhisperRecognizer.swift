@@ -54,7 +54,7 @@ final class WhisperRecognizer: SpeechRecognizing {
         }
 
         return ASRResult(text: text,
-                         detectedLanguageCode: result?.language.flatMap { Self.localeCode(fromWhisper: $0) })
+                         detectedLanguageCode: (result?.language).flatMap { Self.localeCode(fromWhisper: $0) })
     }
 
     // zh → zh-Hans，en → en
