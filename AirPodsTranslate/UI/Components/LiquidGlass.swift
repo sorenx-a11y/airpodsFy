@@ -17,7 +17,7 @@ extension View {
 
     /// 液态玻璃圆形容器（播放、截句等圆形按钮）
     func glassCircle(_ tint: Color = .primary.opacity(0.85)) -> some View {
-        glassEffect(.regular.tint(tint).interactive(), in: .circle)
+        glassEffect(.regular.tint(tint).interactive(), in: Circle())
     }
 }
 
