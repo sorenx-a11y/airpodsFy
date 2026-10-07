@@ -69,10 +69,10 @@ struct HistoryListView: View {
     private func historyRow(_ conv: Conversation) -> some View {
         HStack(spacing: 10) {
             Image(systemName: "bubble.left.and.bubble.right.fill")
-                .font(.system(size: 17, weight: .semibold))
+                .font(.system(size: 15, weight: .semibold))
                 .foregroundStyle(Color.primary)
-                .frame(width: 38, height: 38)
-                .glassCard(cornerRadius: 11)
+                .frame(width: 34, height: 34)
+                .glassCard(cornerRadius: 10)
 
             VStack(alignment: .leading, spacing: 4) {
                 Text(conv.title)
@@ -92,9 +92,9 @@ struct HistoryListView: View {
                 pendingDelete = conv
             } label: {
                 Image(systemName: "trash")
-                    .font(.system(size: 16))
+                    .font(.system(size: 14))
                     .foregroundStyle(Color.red)
-                    .frame(width: 34, height: 34)
+                    .frame(width: 30, height: 30)
             }
             .buttonStyle(.plain)
         }

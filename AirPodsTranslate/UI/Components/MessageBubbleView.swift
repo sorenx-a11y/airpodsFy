@@ -46,9 +46,9 @@ struct TranslationBubble: View {
             onPlay?()
         } label: {
             Image(systemName: isPlaying ? "speaker.wave.2.fill" : "play.fill")
-                .font(.system(size: isPlaying ? 16 : 15, weight: .bold))
+                .font(.system(size: isPlaying ? 14 : 13, weight: .bold))
                 .foregroundStyle(Color.primary)
-                .frame(width: 40, height: 40)
+                .frame(width: 34, height: 34)
         }
         .buttonStyle(.plain)
         .glassCircle()

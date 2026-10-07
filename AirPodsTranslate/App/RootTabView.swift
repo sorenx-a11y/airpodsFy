@@ -31,7 +31,7 @@ struct RootTabView: View {
             tabItem(.history, title: "记录", icon: "clock.arrow.circlepath")
             tabItem(.settings, title: "设置", icon: "gearshape.fill")
         }
-        .frame(height: 76)
+        .frame(height: 60)
         .glassEffect(.regular.tint(Color.primary.opacity(0.12)).interactive(),
                      in: .rect(cornerRadius: 28))
         .overlay {
@@ -47,19 +47,19 @@ struct RootTabView: View {
                 selection = tab
             }
         } label: {
-            VStack(spacing: 4) {
+            VStack(spacing: 3) {
                 Image(systemName: icon)
-                    .font(.system(size: 22, weight: .semibold))
+                    .font(.system(size: 19, weight: .semibold))
                     .foregroundStyle(isSelected ? Color.teal : Color.primary.opacity(0.9))
-                    .frame(width: 48, height: 40)
+                    .frame(width: 40, height: 32)
                     .background {
                         if isSelected {
-                            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                            RoundedRectangle(cornerRadius: 10, style: .continuous)
                                 .fill(Color.primary.opacity(0.18))
                         }
                     }
                 Text(title)
-                    .font(.system(size: 11, weight: isSelected ? .semibold : .regular))
+                    .font(.system(size: 10.5, weight: isSelected ? .semibold : .regular))
             }
             .frame(maxWidth: .infinity)
             .foregroundStyle(isSelected ? Color.teal : Color.primary.opacity(0.9))

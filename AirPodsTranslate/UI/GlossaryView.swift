@@ -38,9 +38,9 @@ struct GlossaryView: View {
             ToolbarItem(placement: .topBarTrailing) {
                 Button { showAdd = true } label: {
                     Image(systemName: "plus")
-                        .font(.system(size: 17, weight: .semibold))
+                        .font(.system(size: 15, weight: .semibold))
                         .foregroundStyle(Color.primary)
-                        .frame(width: 44, height: 44)
+                        .frame(width: 36, height: 36)
                 }
                 .buttonStyle(.plain)
                 .glassCircle()

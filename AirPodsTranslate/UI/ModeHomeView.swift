@@ -60,9 +60,9 @@ struct ModeHomeView: View {
                     }
                 } label: {
                     Image(systemName: "arrow.left.arrow.right")
-                        .font(.system(size: 17, weight: .semibold))
+                        .font(.system(size: 15, weight: .semibold))
                         .foregroundStyle(Color.primary)
-                        .frame(width: 44, height: 44)
+                        .frame(width: 36, height: 36)
                 }
                 .buttonStyle(.plain)
                 .glassCircle()
@@ -117,27 +117,27 @@ struct ModeHomeView: View {
         VStack(spacing: 14) {
             ForEach(TranslateMode.allCases) { mode in
                 NavigationLink(value: mode) {
-                    HStack(spacing: 14) {
+                    HStack(spacing: 12) {
                         Image(systemName: mode.iconName)
-                            .font(.system(size: 22, weight: .semibold))
+                            .font(.system(size: 18, weight: .semibold))
                             .foregroundStyle(Color.primary)
-                            .frame(width: 52, height: 52)
-                            .glassCard(cornerRadius: 15)
+                            .frame(width: 42, height: 42)
+                            .glassCard(cornerRadius: 13)
 
                         VStack(alignment: .leading, spacing: 3) {
                             Text(mode.title)
-                                .font(.system(size: 16, weight: .bold))
+                                .font(.system(size: 15.5, weight: .bold))
                                 .foregroundStyle(.primary)
                             Text(mode.subtitle)
-                                .font(.system(size: 12))
+                                .font(.system(size: 11.5))
                                 .foregroundStyle(.secondary)
                         }
                         Spacer()
                         Image(systemName: "chevron.right")
-                            .font(.system(size: 12, weight: .semibold))
+                            .font(.system(size: 11, weight: .semibold))
                             .foregroundStyle(.tertiary)
                     }
-                    .padding(14)
+                    .padding(12)
                     .glassCard()
                 }
                 .buttonStyle(.plain)

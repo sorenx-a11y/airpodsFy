@@ -56,8 +56,8 @@ struct ConversationView: View {
                 dismiss()
             } label: {
                 Image(systemName: "xmark")
-                    .font(.headline)
-                    .frame(width: 44, height: 44)
+                    .font(.system(size: 15, weight: .semibold))
+                    .frame(width: 36, height: 36)
             }
             .buttonStyle(.plain)
             .glassCircle()
@@ -181,9 +181,9 @@ struct ConversationView: View {
                 dismiss()
             } label: {
                 Image(systemName: "stop.fill")
-                    .font(.system(size: 26, weight: .bold))
-                    .foregroundStyle(Color.primary)
-                    .frame(width: 68, height: 68)
+                    .font(.system(size: 22, weight: .bold))
+                    .foregroundStyle(Color.red)
+                    .frame(width: 56, height: 56)
             }
             .buttonStyle(.plain)
             .glassCircle()
@@ -194,9 +194,9 @@ struct ConversationView: View {
                     orchestrator?.manualFlush()
                 } label: {
                     Image(systemName: "scissors")
-                        .font(.system(size: 22, weight: .semibold))
+                        .font(.system(size: 18, weight: .semibold))
                         .foregroundStyle(Color.primary)
-                        .frame(width: 58, height: 58)
+                        .frame(width: 48, height: 48)
                 }
                 .buttonStyle(.plain)
                 .glassCircle()
