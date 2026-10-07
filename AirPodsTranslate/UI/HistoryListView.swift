@@ -72,7 +72,7 @@ struct HistoryListView: View {
                 .font(.system(size: 17, weight: .semibold))
                 .foregroundStyle(Color.brand)
                 .frame(width: 38, height: 38)
-                .glassTinted(Color.brand, cornerRadius: 11)
+                .glassCard(cornerRadius: 11)
 
             VStack(alignment: .leading, spacing: 4) {
                 Text(conv.title)

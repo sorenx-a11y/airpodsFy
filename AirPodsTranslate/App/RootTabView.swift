@@ -55,7 +55,7 @@ struct RootTabView: View {
             .background {
                 if isSelected {
                     RoundedRectangle(cornerRadius: 20)
-                        .glassTinted(Color.brand, cornerRadius: 20)
+                        .glassCard(cornerRadius: 20)
                 }
             }
         }

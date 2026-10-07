@@ -65,7 +65,7 @@ struct ModeHomeView: View {
                         .frame(width: 44, height: 44)
                 }
                 .buttonStyle(.plain)
-                .glassCircle(Color.brand)
+                .glassCircle()
 
                 languageBox(title: "对方说", code: settings.theirLanguageCode) { showTheirLang = true }
             }
@@ -122,7 +122,7 @@ struct ModeHomeView: View {
                             .font(.system(size: 22, weight: .semibold))
                             .foregroundStyle(Color.brand)
                             .frame(width: 52, height: 52)
-                            .glassTinted(Color.brand, cornerRadius: 15)
+                            .glassCard(cornerRadius: 15)
 
                         VStack(alignment: .leading, spacing: 3) {
                             Text(mode.title)

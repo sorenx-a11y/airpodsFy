@@ -39,10 +39,11 @@ struct GlossaryView: View {
                 Button { showAdd = true } label: {
                     Image(systemName: "plus")
                         .font(.system(size: 17, weight: .semibold))
+                        .foregroundStyle(Color.brand)
                         .frame(width: 44, height: 44)
                 }
                 .buttonStyle(.plain)
-                .glassCircle(Color.brand)
+                .glassCircle()
             }
         }
         .alert("添加术语", isPresented: $showAdd) {

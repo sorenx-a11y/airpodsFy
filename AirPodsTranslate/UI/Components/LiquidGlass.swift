@@ -9,20 +9,18 @@ extension View {
         glassEffect(.regular, in: .rect(cornerRadius: cornerRadius))
     }
 
-    /// 带色调的液态玻璃（用于强调按钮）
-    func glassTinted(_ tint: Color, cornerRadius: CGFloat = 22) -> some View {
-        glassEffect(.regular.tint(tint).interactive(),
-                    in: .rect(cornerRadius: cornerRadius))
+    /// 液态玻璃圆形容器（播放、截句等圆形按钮）。tint 传 nil 为无色透明玻璃。
+    func glassCircle(_ tint: Color? = nil) -> some View {
+        if let tint {
+            glassEffect(.regular.tint(tint).interactive(), in: Circle())
+        } else {
+            glassEffect(.regular.interactive(), in: Circle())
+        }
     }
 
-    /// 液态玻璃圆形容器（播放、截句等圆形按钮）
-    func glassCircle(_ tint: Color = .primary.opacity(0.85)) -> some View {
-        glassEffect(.regular.tint(tint).interactive(), in: Circle())
-    }
-
-    /// 对话气泡：带说话方色调的液态玻璃
-    func glassBubble(_ accent: Color) -> some View {
-        glassEffect(.regular.tint(accent.opacity(0.16)).interactive(),
+    /// 对话气泡：无色透明液态玻璃（说话双方靠左右位置区分）
+    func glassBubble() -> some View {
+        glassEffect(.regular.interactive(),
                     in: .rect(cornerRadius: 19))
     }
 }

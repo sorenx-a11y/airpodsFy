@@ -182,10 +182,11 @@ struct ConversationView: View {
             } label: {
                 Image(systemName: "stop.fill")
                     .font(.system(size: 26, weight: .bold))
+                    .foregroundStyle(Color.red)
                     .frame(width: 68, height: 68)
             }
             .buttonStyle(.plain)
-            .glassCircle(Color.red)
+            .glassCircle()
 
             // 截句按钮：靠左
             HStack {
@@ -194,10 +195,11 @@ struct ConversationView: View {
                 } label: {
                     Image(systemName: "scissors")
                         .font(.system(size: 22, weight: .semibold))
+                        .foregroundStyle(Color.brand)
                         .frame(width: 58, height: 58)
                 }
                 .buttonStyle(.plain)
-                .glassCircle(Color.brand)
+                .glassCircle()
 
                 Spacer()
             }

@@ -72,7 +72,7 @@ struct SettingsView: View {
                             .background {
                                 if settings.appearance == mode {
                                     RoundedRectangle(cornerRadius: 11)
-                                        .glassTinted(Color.brand, cornerRadius: 11)
+                                        .glassCard(cornerRadius: 11)
                                 }
                             }
                         }

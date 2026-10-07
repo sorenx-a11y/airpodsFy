@@ -33,7 +33,7 @@ struct TranslationBubble: View {
             .frame(maxWidth: 280, alignment: isMe ? .trailing : .leading)
             .padding(.horizontal, 14)
             .padding(.vertical, 10)
-            .glassBubble(accent)
+            .glassBubble()
 
             if !isMe {
                 replayButton
@@ -48,10 +48,11 @@ struct TranslationBubble: View {
         } label: {
             Image(systemName: isPlaying ? "speaker.wave.2.fill" : "play.fill")
                 .font(.system(size: isPlaying ? 16 : 15, weight: .bold))
+                .foregroundStyle(isPlaying ? accent : Color.primary.opacity(0.7))
                 .frame(width: 40, height: 40)
         }
         .buttonStyle(.plain)
-        .glassCircle(isPlaying ? accent : Color.primary.opacity(0.75))
+        .glassCircle()
         .accessibilityLabel(isPlaying ? "正在播放" : "重新播放")
         .disabled(!playEnabled)
         .opacity(playEnabled ? 1 : 0.4)
