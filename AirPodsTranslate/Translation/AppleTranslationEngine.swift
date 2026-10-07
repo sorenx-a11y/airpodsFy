@@ -22,7 +22,7 @@ final class AppleTranslationEngine: TranslationServicing {
     }
 
     /// 语言对配置（修改 source/target 后系统会自动重启 translationTask）
-    let configuration = TranslationSession.Configuration()
+    @ObservationIgnored var configuration = TranslationSession.Configuration()
 
     /// 仅用于驱动视图观察
     var configVersion = 0
