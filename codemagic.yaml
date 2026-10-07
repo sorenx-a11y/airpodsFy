@@ -1,12 +1,18 @@
 workflows:
   ios-build:
     name: iOS Build
+    max_build_duration: 120
     environment:
       xcode: 16.0
       cocoapods: default
       vars:
         XCODE_PROJECT: "AirPodsTranslate.xcodeproj"
         XCODE_SCHEME: "AirPodsTranslate"
+    cache:
+      cache_paths:
+        - $CM_BUILD_DIR/.build
+        - $HOME/Library/Developer/Xcode/DerivedData
+        - $HOME/Library/Caches/org.swift.swiftpm
     scripts:
       - name: Install XcodeGen
         script: brew install xcodegen
@@ -19,6 +25,7 @@ workflows:
           xcodebuild build \
             -project "$XCODE_PROJECT" \
             -scheme "$XCODE_SCHEME" \
-            -destination 'generic/platform=iOS Simulator'
+            -destination 'generic/platform=iOS Simulator' \
+            -quiet
     artifacts:
       - $HOME/Library/Developer/Xcode/DerivedData/**/Build/**/*.app
