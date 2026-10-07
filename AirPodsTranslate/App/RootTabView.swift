@@ -23,14 +23,12 @@ struct RootTabView: View {
         }
     }
 
-    // MARK: - 自定义底部栏（仿 iOS 27 翻译 App：灰色玻璃胶囊，选中项青色无填充）
+    // MARK: - 自定义底部栏（仿 iOS 27 翻译 App：灰色玻璃胶囊，选中项为青色圆形）
 
     private var customTabBar: some View {
         HStack(spacing: 0) {
             tabItem(.home, title: "对话", icon: "bubble.left.and.bubble.right.fill")
-            tabDivider
             tabItem(.history, title: "记录", icon: "clock.arrow.circlepath")
-            tabDivider
             tabItem(.settings, title: "设置", icon: "gearshape.fill")
         }
         .frame(height: 76)
@@ -42,12 +40,6 @@ struct RootTabView: View {
         }
     }
 
-    private var tabDivider: some View {
-        Capsule()
-            .fill(Color.primary.opacity(0.10))
-            .frame(width: 0.5, height: 30)
-    }
-
     private func tabItem(_ tab: Tab, title: String, icon: String) -> some View {
         let isSelected = selection == tab
         return Button {
@@ -57,7 +49,14 @@ struct RootTabView: View {
         } label: {
             VStack(spacing: 4) {
                 Image(systemName: icon)
-                    .font(.system(size: 24, weight: .regular))
+                    .font(.system(size: 22, weight: .semibold))
+                    .foregroundStyle(isSelected ? Color(uiColor: .systemBackground) : Color.primary.opacity(0.9))
+                    .frame(width: 44, height: 44)
+                    .background {
+                        if isSelected {
+                            Circle().fill(Color.teal)
+                        }
+                    }
                 Text(title)
                     .font(.system(size: 11, weight: isSelected ? .semibold : .regular))
             }
