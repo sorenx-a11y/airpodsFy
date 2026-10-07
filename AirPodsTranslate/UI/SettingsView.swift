@@ -66,13 +66,15 @@ struct SettingsView: View {
                                 }
                                 .frame(maxWidth: .infinity)
                                 .padding(.vertical, 9)
-                                .foregroundStyle(settings.appearance == mode ? Color.brand : .secondary)
+                                .foregroundStyle(settings.appearance == mode
+                                                 ? Color(uiColor: .systemBackground)
+                                                 : Color.secondary)
                             }
                             .buttonStyle(.plain)
                             .background {
                                 if settings.appearance == mode {
                                     RoundedRectangle(cornerRadius: 11)
-                                        .glassCard(cornerRadius: 11)
+                                        .fill(Color.primary)
                                 }
                             }
                         }
@@ -112,7 +114,7 @@ struct SettingsView: View {
                 RowDivider()
                 SettingsRow(icon: "lock.fill", title: "锁定语种，提高识别准确率") {
                     Toggle("", isOn: Bindable(settings).lockLanguage)
-                        .labelsHidden().tint(Color.brand)
+                        .labelsHidden().tint(.primary)
                 }
             }
         }
@@ -143,14 +145,14 @@ struct SettingsView: View {
                             .foregroundStyle(.secondary)
                     }
                     Slider(value: Bindable(settings).translatedVolume, in: 0.2...1.0)
-                        .tint(Color.brand)
+                        .tint(.primary)
                 }
                 .padding(.horizontal, 16)
                 .padding(.vertical, 11)
                 RowDivider()
                 SettingsRow(icon: "speaker.wave.2.fill", title: "朗读译文") {
                     Toggle("", isOn: Bindable(settings).ttsEnabled)
-                        .labelsHidden().tint(Color.brand)
+                        .labelsHidden().tint(.primary)
                 }
                 if settings.ttsEnabled {
                     RowDivider()
@@ -163,7 +165,7 @@ struct SettingsView: View {
                                 .foregroundStyle(.secondary)
                         }
                         Slider(value: Bindable(settings).ttsRate, in: 0.35...0.65)
-                            .tint(Color.brand)
+                            .tint(.primary)
                     }
                     .padding(.horizontal, 16)
                     .padding(.vertical, 11)
@@ -209,7 +211,7 @@ struct SettingsView: View {
                 RowDivider()
                 SettingsRow(icon: "internaldrive", title: "自动保存对话记录") {
                     Toggle("", isOn: Bindable(settings).autoSaveHistory)
-                        .labelsHidden().tint(Color.brand)
+                        .labelsHidden().tint(.primary)
                 }
             }
             SettingsNote(text: "记录与术语仅保存在本机，卸载 App 会一并清除。")

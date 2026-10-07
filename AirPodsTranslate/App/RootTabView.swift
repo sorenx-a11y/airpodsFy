@@ -51,11 +51,11 @@ struct RootTabView: View {
             }
             .frame(maxWidth: .infinity)
             .padding(.vertical, 8)
-            .foregroundStyle(isSelected ? Color.brand : .secondary)
+            .foregroundStyle(isSelected ? Color(uiColor: .systemBackground) : .secondary)
             .background {
                 if isSelected {
                     RoundedRectangle(cornerRadius: 20)
-                        .glassCard(cornerRadius: 20)
+                        .fill(Color.primary)
                 }
             }
         }

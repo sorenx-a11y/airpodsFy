@@ -70,7 +70,7 @@ struct HistoryListView: View {
         HStack(spacing: 10) {
             Image(systemName: "bubble.left.and.bubble.right.fill")
                 .font(.system(size: 17, weight: .semibold))
-                .foregroundStyle(Color.brand)
+                .foregroundStyle(Color.primary)
                 .frame(width: 38, height: 38)
                 .glassCard(cornerRadius: 11)
 

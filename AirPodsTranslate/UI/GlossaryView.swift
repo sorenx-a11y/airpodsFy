@@ -39,7 +39,7 @@ struct GlossaryView: View {
                 Button { showAdd = true } label: {
                     Image(systemName: "plus")
                         .font(.system(size: 17, weight: .semibold))
-                        .foregroundStyle(Color.brand)
+                        .foregroundStyle(Color.primary)
                         .frame(width: 44, height: 44)
                 }
                 .buttonStyle(.plain)

@@ -61,7 +61,7 @@ struct ModeHomeView: View {
                 } label: {
                     Image(systemName: "arrow.left.arrow.right")
                         .font(.system(size: 17, weight: .semibold))
-                        .foregroundStyle(Color.brand)
+                        .foregroundStyle(Color.primary)
                         .frame(width: 44, height: 44)
                 }
                 .buttonStyle(.plain)
@@ -76,7 +76,7 @@ struct ModeHomeView: View {
                 Spacer()
                 Toggle("", isOn: Bindable(settings).lockLanguage)
                     .labelsHidden()
-                    .tint(Color.brand)
+                    .tint(.primary)
             }
         }
         .padding(16)
@@ -96,7 +96,7 @@ struct ModeHomeView: View {
                     Spacer()
                     Image(systemName: "chevron.up.chevron.down")
                         .font(.system(size: 11, weight: .semibold))
-                        .foregroundStyle(Color.brand)
+                        .foregroundStyle(Color.secondary)
                 }
             }
             .padding(.horizontal, 14)
@@ -120,7 +120,7 @@ struct ModeHomeView: View {
                     HStack(spacing: 14) {
                         Image(systemName: mode.iconName)
                             .font(.system(size: 22, weight: .semibold))
-                            .foregroundStyle(Color.brand)
+                            .foregroundStyle(Color.primary)
                             .frame(width: 52, height: 52)
                             .glassCard(cornerRadius: 15)
 

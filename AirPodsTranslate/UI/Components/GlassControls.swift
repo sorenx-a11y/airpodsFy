@@ -34,7 +34,7 @@ struct GlassOptionSheet<T: Hashable>: View {
                             if selection == opt.value {
                                 Image(systemName: "checkmark")
                                     .font(.system(size: 16, weight: .bold))
-                                    .foregroundStyle(Color.brand)
+                                    .foregroundStyle(Color.primary)
                             }
                         }
                         .padding(.horizontal, 18)
@@ -62,7 +62,7 @@ struct GlassOptionSheet<T: Hashable>: View {
                     .padding(.vertical, 15)
             }
             .buttonStyle(.plain)
-            .foregroundStyle(Color.brand)
+            .foregroundStyle(Color.primary)
             .glassCard(cornerRadius: 18)
             .padding(.horizontal, 8)
         }
@@ -115,7 +115,7 @@ struct SettingsRow<Accessory: View>: View {
             if let icon {
                 Image(systemName: icon)
                     .font(.system(size: 15, weight: .semibold))
-                    .foregroundStyle(titleColor == .primary ? Color.brand : titleColor)
+                    .foregroundStyle(titleColor == .primary ? Color.primary : titleColor)
                     .frame(width: 22)
             }
             Text(title)

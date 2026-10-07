@@ -9,7 +9,7 @@ struct AirPodsTranslateApp: App {
         WindowGroup {
             RootTabView()
                 .environment(settings)
-                .tint(Color.brand)
+                .tint(.primary)
                 .preferredColorScheme(settings.appearance.colorScheme)
                 .attachTranslationSession()
         }

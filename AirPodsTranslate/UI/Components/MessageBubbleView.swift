@@ -11,7 +11,6 @@ struct TranslationBubble: View {
     var playEnabled: Bool = true
     var onPlay: (() -> Void)?
 
-    private var accent: Color { speaker == .me ? Color.mine : Color.theirs }
     private var isMe: Bool { speaker == .me }
 
     var body: some View {
@@ -48,7 +47,7 @@ struct TranslationBubble: View {
         } label: {
             Image(systemName: isPlaying ? "speaker.wave.2.fill" : "play.fill")
                 .font(.system(size: isPlaying ? 16 : 15, weight: .bold))
-                .foregroundStyle(isPlaying ? accent : Color.primary.opacity(0.7))
+                .foregroundStyle(Color.primary)
                 .frame(width: 40, height: 40)
         }
         .buttonStyle(.plain)

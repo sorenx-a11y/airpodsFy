@@ -182,7 +182,7 @@ struct ConversationView: View {
             } label: {
                 Image(systemName: "stop.fill")
                     .font(.system(size: 26, weight: .bold))
-                    .foregroundStyle(Color.red)
+                    .foregroundStyle(Color.primary)
                     .frame(width: 68, height: 68)
             }
             .buttonStyle(.plain)
@@ -195,7 +195,7 @@ struct ConversationView: View {
                 } label: {
                     Image(systemName: "scissors")
                         .font(.system(size: 22, weight: .semibold))
-                        .foregroundStyle(Color.brand)
+                        .foregroundStyle(Color.primary)
                         .frame(width: 58, height: 58)
                 }
                 .buttonStyle(.plain)
