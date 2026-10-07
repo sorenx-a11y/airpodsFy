@@ -1,4 +1,4 @@
-import SwiftUI
+﻿import SwiftUI
 
 /// Tab 选中青色：深色模式亮青（仿 iOS 27 翻译 App），浅色模式加深保证白底对比
 extension Color {
@@ -155,7 +155,7 @@ struct RootTabView: View {
                 Text(title)
                     .font(.system(size: 11, weight: isActive ? .semibold : .medium))
             }
-            .foregroundStyle(isActive ? Color.tabCyan : Color.primary)
+            .foregroundStyle(isActive ? Color.tabCyan : Color.appInk)
             .frame(maxWidth: .infinity)
             .frame(height: thumbHeight)
             .padding(.horizontal, 6)

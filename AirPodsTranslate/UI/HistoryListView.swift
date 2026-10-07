@@ -1,4 +1,4 @@
-import SwiftUI
+﻿import SwiftUI
 import SwiftData
 
 struct HistoryListView: View {
@@ -70,14 +70,14 @@ struct HistoryListView: View {
         HStack(spacing: 10) {
             Image(systemName: "bubble.left.and.bubble.right.fill")
                 .font(.system(size: 15, weight: .semibold))
-                .foregroundStyle(Color.primary)
+                .foregroundStyle(Color.appInk)
                 .frame(width: 34, height: 34)
                 .glassCard(cornerRadius: 10)
 
             VStack(alignment: .leading, spacing: 4) {
                 Text(conv.title)
                     .font(.system(size: 15, weight: .semibold))
-                    .foregroundStyle(.primary)
+                    .foregroundStyle(Color.appInk)
                     .lineLimit(1)
                 HStack(spacing: 12) {
                     Text("\(conv.messages.count) 句")

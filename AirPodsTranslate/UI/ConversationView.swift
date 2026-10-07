@@ -1,4 +1,4 @@
-import SwiftUI
+﻿import SwiftUI
 
 struct ConversationView: View {
     let mode: TranslateMode
@@ -195,7 +195,7 @@ struct ConversationView: View {
                 } label: {
                     Image(systemName: "scissors")
                         .font(.system(size: 18, weight: .semibold))
-                        .foregroundStyle(Color.primary)
+                        .foregroundStyle(Color.appInk)
                         .frame(width: 48, height: 48)
                 }
                 .buttonStyle(.plain)

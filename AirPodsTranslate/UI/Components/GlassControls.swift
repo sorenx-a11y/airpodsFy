@@ -1,4 +1,4 @@
-import SwiftUI
+﻿import SwiftUI
 
 // MARK: - 玻璃底部选择器（对齐 HTML 原型的 sheet）
 
@@ -29,12 +29,12 @@ struct GlassOptionSheet<T: Hashable>: View {
                         HStack {
                             Text(opt.label)
                                 .font(.body)
-                                .foregroundStyle(.primary)
+                                .foregroundStyle(Color.appInk)
                             Spacer()
                             if selection == opt.value {
                                 Image(systemName: "checkmark")
                                     .font(.system(size: 16, weight: .bold))
-                                    .foregroundStyle(Color.primary)
+                                    .foregroundStyle(Color.appInk)
                             }
                         }
                         .padding(.horizontal, 18)
@@ -62,7 +62,7 @@ struct GlassOptionSheet<T: Hashable>: View {
                     .padding(.vertical, 15)
             }
             .buttonStyle(.plain)
-            .foregroundStyle(Color.primary)
+            .foregroundStyle(Color.appInk)
             .glassCard(cornerRadius: 18)
             .padding(.horizontal, 8)
         }
@@ -105,7 +105,7 @@ struct GroupTitle: View {
 struct SettingsRow<Accessory: View>: View {
     var icon: String?
     var title: String
-    var titleColor: Color = .primary
+    var titleColor: Color = Color.appInk
     var showChevron: Bool = false
     var action: (() -> Void)?
     @ViewBuilder var accessory: () -> Accessory
@@ -115,7 +115,7 @@ struct SettingsRow<Accessory: View>: View {
             if let icon {
                 Image(systemName: icon)
                     .font(.system(size: 15, weight: .semibold))
-                    .foregroundStyle(titleColor == .primary ? Color.primary : titleColor)
+                    .foregroundStyle(titleColor)
                     .frame(width: 22)
             }
             Text(title)

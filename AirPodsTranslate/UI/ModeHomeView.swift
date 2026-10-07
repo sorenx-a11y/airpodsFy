@@ -1,4 +1,4 @@
-import SwiftUI
+﻿import SwiftUI
 
 struct ModeHomeView: View {
     @Environment(SettingsStore.self) private var settings
@@ -61,7 +61,7 @@ struct ModeHomeView: View {
                 } label: {
                     Image(systemName: "arrow.left.arrow.right")
                         .font(.system(size: 15, weight: .semibold))
-                        .foregroundStyle(Color.primary)
+                        .foregroundStyle(Color.appInk)
                         .frame(width: 36, height: 36)
                 }
                 .buttonStyle(.plain)
@@ -76,7 +76,7 @@ struct ModeHomeView: View {
                 Spacer()
                 Toggle("", isOn: Bindable(settings).lockLanguage)
                     .labelsHidden()
-                    .tint(.primary)
+                    .tint(Color.appInk)
             }
         }
         .padding(16)
@@ -92,7 +92,7 @@ struct ModeHomeView: View {
                 HStack {
                     Text(label(for: code))
                         .font(.system(size: 15, weight: .semibold))
-                        .foregroundStyle(.primary)
+                        .foregroundStyle(Color.appInk)
                     Spacer()
                     Image(systemName: "chevron.up.chevron.down")
                         .font(.system(size: 11, weight: .semibold))
@@ -120,14 +120,14 @@ struct ModeHomeView: View {
                     HStack(spacing: 12) {
                         Image(systemName: mode.iconName)
                             .font(.system(size: 18, weight: .semibold))
-                            .foregroundStyle(Color.primary)
+                            .foregroundStyle(Color.appInk)
                             .frame(width: 42, height: 42)
                             .glassCard(cornerRadius: 13)
 
                         VStack(alignment: .leading, spacing: 3) {
                             Text(mode.title)
                                 .font(.system(size: 15.5, weight: .bold))
-                                .foregroundStyle(.primary)
+                                .foregroundStyle(Color.appInk)
                             Text(mode.subtitle)
                                 .font(.system(size: 11.5))
                                 .foregroundStyle(.secondary)

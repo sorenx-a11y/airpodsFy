@@ -1,4 +1,4 @@
-import SwiftUI
+﻿import SwiftUI
 
 /// 通用译文字泡：原文小字 + 译文大字，液态玻璃材质。
 /// 会话页（ChatMessage）与记录详情页（MessageEntity）共用。
@@ -47,7 +47,7 @@ struct TranslationBubble: View {
         } label: {
             Image(systemName: isPlaying ? "speaker.wave.2.fill" : "play.fill")
                 .font(.system(size: isPlaying ? 14 : 13, weight: .bold))
-                .foregroundStyle(Color.primary)
+                .foregroundStyle(Color.appInk)
                 .frame(width: 34, height: 34)
         }
         .buttonStyle(.plain)

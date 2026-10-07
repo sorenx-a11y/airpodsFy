@@ -1,5 +1,15 @@
 import SwiftUI
 
+/// 全局主墨色：浅色模式为深灰（不用纯黑），深色模式为纯白。
+/// 所有文字与图标统一使用该颜色。
+extension Color {
+    static let appInk = Color(uiColor: UIColor { traits in
+        traits.userInterfaceStyle == .dark
+            ? UIColor(white: 1.0, alpha: 1)
+            : UIColor(white: 0.30, alpha: 1)
+    })
+}
+
 /// iOS 26 Liquid Glass（液态玻璃）统一封装。
 /// 背景为纯白/纯黑，玻璃只带轻微雾面与细边，不做彩色填充。
 ///

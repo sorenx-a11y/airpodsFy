@@ -1,4 +1,4 @@
-import SwiftUI
+﻿import SwiftUI
 import SwiftData
 
 struct GlossaryView: View {
@@ -39,7 +39,7 @@ struct GlossaryView: View {
                 Button { showAdd = true } label: {
                     Image(systemName: "plus")
                         .font(.system(size: 15, weight: .semibold))
-                        .foregroundStyle(Color.primary)
+                        .foregroundStyle(Color.appInk)
                         .frame(width: 36, height: 36)
                 }
                 .buttonStyle(.plain)
