@@ -1,0 +1,37 @@
+name: AirPodsTranslate
+options:
+  bundleIdPrefix: com.airpodstranslate
+  deploymentTarget:
+    iOS: "26.0"
+  createIntermediateGroups: true
+
+packages:
+  WhisperKit:
+    url: https://github.com/argmaxinc/whisperkit.git
+    from: "0.9.0"
+
+targets:
+  AirPodsTranslate:
+    type: application
+    platform: iOS
+    sources:
+      - path: AirPodsTranslate
+        excludes:
+          - "Info.plist"
+          - "AirPodsTranslate.entitlements"
+    info:
+      path: AirPodsTranslate/Info.plist
+    entitlements:
+      path: AirPodsTranslate/AirPodsTranslate.entitlements
+    dependencies:
+      - package: WhisperKit
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.airpodstranslate.app
+        MARKETING_VERSION: "1.0"
+        CURRENT_PROJECT_VERSION: "1"
+        SWIFT_VERSION: "5.0"
+        TARGETED_DEVICE_FAMILY: "1,2"
+        IPHONEOS_DEPLOYMENT_TARGET: "26.0"
+        ENABLE_USER_SCRIPT_SANDBOXING: YES
+        SWIFT_STRICT_CONCURRENCY: minimal

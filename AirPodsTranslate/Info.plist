@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>CFBundleDisplayName</key>
+    <string>离线翻译</string>
+    <key>NSMicrophoneUsageDescription</key>
+    <string>用于采集你与对方的语音，全部识别与翻译均在本机完成，不上传任何音频。</string>
+    <key>NSSpeechRecognitionUsageDescription</key>
+    <string>用于在本机离线识别你说的话，不会上传任何语音或文本。</string>
+    <key>UILaunchScreen</key>
+    <dict/>
+    <key>UISupportedInterfaceOrientations</key>
+    <array>
+        <string>UIInterfaceOrientationPortrait</string>
+        <string>UIInterfaceOrientationLandscapeLeft</string>
+        <string>UIInterfaceOrientationLandscapeRight</string>
+    </array>
+    <key>UISupportedInterfaceOrientations~ipad</key>
+    <array>
+        <string>UIInterfaceOrientationPortrait</string>
+        <string>UIInterfaceOrientationPortraitUpsideDown</string>
+        <string>UIInterfaceOrientationLandscapeLeft</string>
+        <string>UIInterfaceOrientationLandscapeRight</string>
+    </array>
+    <key>ITSAppUsesNonExemptEncryption</key>
+    <false/>
+</dict>
+</plist>

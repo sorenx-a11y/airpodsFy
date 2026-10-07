@@ -1,0 +1,44 @@
+# Xcode
+build/
+DerivedData/
+*.xcodeproj/
+*.xcworkspace/
+xcuserdata/
+*.pbxuser
+!default.pbxuser
+*.mode1v3
+!default.mode1v3
+*.mode2v3
+!default.mode2v3
+*.perspectivev3
+!default.perspectivev3
+*.hmap
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# Swift Package Manager
+.build/
+Packages/
+.swiftpm/
+
+# XcodeGen
+*.xcodeproj
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*~
+
+# Logs
+*.log
+
+# Preview server (if any temp files)
+__pycache__/

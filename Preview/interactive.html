@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>AirPodsTranslate 交互原型 · Liquid Glass</title>
+<style>
+  :root{
+    --brand:#1e73ef; --mine:#1e73ef; --theirs:#28a745; --red:#ff453a;
+    --label:#0a0d14; --secondary:#5d6675; --tertiary:#9aa3b2;
+    --glass-bg:rgba(255,255,255,.55);
+    --glass-bg-strong:rgba(255,255,255,.72);
+    --glass-border:rgba(255,255,255,.85);
+    --hairline:rgba(20,30,50,.08);
+    --chip-bg:rgba(255,255,255,.5);
+    --track:#d9deea;
+  }
+  body[data-theme=dark]{
+    --label:#f2f5fb; --secondary:#9aa4b8; --tertiary:#6b7588;
+    --glass-bg:rgba(28,34,48,.45);
+    --glass-bg-strong:rgba(36,43,60,.66);
+    --glass-border:rgba(255,255,255,.14);
+    --hairline:rgba(255,255,255,.09);
+    --chip-bg:rgba(255,255,255,.08);
+    --track:rgba(255,255,255,.18);
+  }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-font-smoothing:antialiased;}
+  html,body{height:100%;}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","PingFang SC","Helvetica Neue",sans-serif;
+    color:var(--label);overflow:hidden;display:flex;flex-direction:column;align-items:center;
+    transition:color .3s;
+  }
+  /* 液态玻璃折射采样背景：彩色 mesh 光斑 */
+  .backdrop{position:fixed;inset:0;z-index:-1;overflow:hidden;
+    background:#e9eff9;transition:background .4s;}
+  body[data-theme=dark] .backdrop{background:#05070d;}
+  .blob{position:absolute;border-radius:50%;filter:blur(70px);opacity:.75;transition:background .4s;}
+  .b1{width:55vmax;height:55vmax;left:-12vmax;top:-14vmax;background:radial-gradient(circle,#9ec2ff,transparent 65%);}
+  .b2{width:48vmax;height:48vmax;right:-14vmax;top:-8vmax;background:radial-gradient(circle,#cbb6ff,transparent 65%);}
+  .b3{width:52vmax;height:52vmax;left:8vmax;bottom:-20vmax;background:radial-gradient(circle,#a6efd2,transparent 65%);}
+  .b4{width:40vmax;height:40vmax;right:6vmax;bottom:-12vmax;background:radial-gradient(circle,#ffcba8,transparent 65%);}
+  body[data-theme=dark] .b1{background:radial-gradient(circle,#1d4685,transparent 65%);opacity:.9;}
+  body[data-theme=dark] .b2{background:radial-gradient(circle,#3b2a6b,transparent 65%);}
+  body[data-theme=dark] .b3{background:radial-gradient(circle,#0f5242,transparent 65%);}
+  body[data-theme=dark] .b4{background:radial-gradient(circle,#5d2f1c,transparent 65%);}
+
+  .page-title{padding:14px 0 4px;text-align:center;flex:none;}
+  .page-title b{font-size:16px;letter-spacing:-.3px;}
+  .page-title span{display:block;font-size:11.5px;color:var(--secondary);margin-top:2px;}
+  .stage{flex:1;display:flex;align-items:center;justify-content:center;width:100%;min-height:0;}
+
+  .phone{width:390px;height:844px;border-radius:54px;padding:10px;flex:none;position:relative;
+    background:linear-gradient(160deg,rgba(255,255,255,.7),rgba(210,218,232,.35));
+    box-shadow:0 30px 70px -18px rgba(20,50,110,.35),0 6px 20px rgba(0,0,0,.18),inset 0 0 0 1.5px rgba(255,255,255,.6);
+    transition:background .4s;}
+  body[data-theme=dark] .phone{
+    background:linear-gradient(160deg,rgba(50,58,78,.8),rgba(12,15,24,.9));
+    box-shadow:0 30px 70px -18px rgba(0,0,0,.7),0 6px 20px rgba(0,0,0,.5),inset 0 0 0 1.5px rgba(255,255,255,.1);}
+  .screen{width:100%;height:100%;border-radius:45px;overflow:hidden;position:relative;background:transparent;}
+  .island{position:absolute;top:11px;left:50%;transform:translateX(-50%);width:120px;height:34px;background:#000;border-radius:18px;z-index:60;}
+
+  .view{position:absolute;inset:0;display:flex;flex-direction:column;opacity:0;pointer-events:none;transition:opacity .18s;}
+  .view.active{opacity:1;pointer-events:auto;}
+
+  /* 液态玻璃通用 */
+  .glass{background:var(--glass-bg);backdrop-filter:blur(40px) saturate(2);-webkit-backdrop-filter:blur(40px) saturate(2);
+    border:.6px solid var(--glass-border);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.55),0 10px 30px -12px rgba(20,40,90,.28);}
+  body[data-theme=dark] .glass{box-shadow:inset 0 1px 0 rgba(255,255,255,.14),0 12px 32px -12px rgba(0,0,0,.65);}
+  /* 玻璃按钮统一材质 */
+  .glass-btn{backdrop-filter:blur(24px) saturate(1.9);-webkit-backdrop-filter:blur(24px) saturate(1.9);
+    border:.6px solid var(--glass-border);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.5),0 6px 18px -8px rgba(20,40,90,.28);}
+  body[data-theme=dark] .glass-btn{box-shadow:inset 0 1px 0 rgba(255,255,255,.12),0 6px 18px -8px rgba(0,0,0,.6);}
+
+  .statusbar{height:52px;display:flex;align-items:center;justify-content:space-between;padding:0 30px;font-size:15px;font-weight:600;flex:none;}
+  .batt{width:24px;height:12px;border:1.5px solid currentColor;border-radius:4px;position:relative;opacity:.55;}
+  .batt::after{content:"";position:absolute;left:1.5px;top:1.5px;bottom:1.5px;width:72%;background:currentColor;border-radius:2px;}
+  .nav-title{font-size:17px;font-weight:700;text-align:center;padding:4px 0 8px;flex:none;letter-spacing:-.2px;}
+
+  .scroll{flex:1;overflow-y:auto;padding:0 16px 14px;}
+  .scroll,.chat,.list-wrap,.detail-list,.form-scroll,.sheet-ops{scrollbar-width:none;-ms-overflow-style:none;}
+  .scroll::-webkit-scrollbar,.chat::-webkit-scrollbar,.list-wrap::-webkit-scrollbar,.detail-list::-webkit-scrollbar,.form-scroll::-webkit-scrollbar,.sheet-ops::-webkit-scrollbar{display:none;width:0;height:0;}
+  .card{border-radius:22px;padding:16px;margin-bottom:14px;}
+  .lang-row{display:flex;align-items:flex-end;gap:8px;}
+  .lang-box{flex:1;}
+  .lang-box .lbl{font-size:11px;color:var(--secondary);margin-bottom:4px;}
+  .lang-pick{background:var(--glass-bg);border-radius:14px;padding:12px 14px;font-size:15px;font-weight:600;display:flex;justify-content:space-between;align-items:center;
+    backdrop-filter:blur(20px) saturate(1.8);-webkit-backdrop-filter:blur(20px) saturate(1.8);
+    border:.6px solid var(--glass-border);box-shadow:inset 0 1px 0 rgba(255,255,255,.5);}
+  .swap{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--brand);flex:none;cursor:pointer;
+    background:color-mix(in srgb,var(--brand) 14%,var(--glass-bg));
+    backdrop-filter:blur(20px) saturate(1.8);-webkit-backdrop-filter:blur(20px) saturate(1.8);
+    border:.6px solid var(--glass-border);box-shadow:inset 0 1px 0 rgba(255,255,255,.5),0 4px 12px -4px rgba(20,40,90,.25);}
+  .toggle-row{display:flex;justify-content:space-between;align-items:center;margin-top:13px;font-size:13px;}
+  .switch{width:46px;height:28px;border-radius:16px;position:relative;cursor:pointer;transition:background .2s;flex:none;}
+  .switch::after{content:"";position:absolute;top:2px;width:24px;height:24px;background:#fff;border-radius:50%;box-shadow:0 2px 6px rgba(0,0,0,.25);transition:left .2s;}
+  .switch.on{background:var(--brand);} .switch.on::after{left:20px;}
+  .switch.off{background:var(--track);} .switch.off::after{left:2px;}
+
+  .mode-card{display:flex;align-items:center;gap:14px;cursor:pointer;}
+  .mode-card:active{transform:scale(.985);}
+  .mode-ico{width:52px;height:52px;border-radius:15px;display:flex;align-items:center;justify-content:center;flex:none;
+    background:color-mix(in srgb,var(--brand) 16%,var(--glass-bg));color:var(--brand);
+    backdrop-filter:blur(20px) saturate(1.8);-webkit-backdrop-filter:blur(20px) saturate(1.8);
+    border:.6px solid var(--glass-border);box-shadow:inset 0 1px 0 rgba(255,255,255,.5),0 4px 12px -4px rgba(20,40,90,.22);}
+  .mode-text h3{font-size:16px;font-weight:700;}
+  .mode-text p{font-size:12px;color:var(--secondary);margin-top:3px;line-height:1.4;}
+  .chev{margin-left:auto;color:var(--tertiary);display:flex;}
+
+  .hp-title{font-size:13.5px;font-weight:700;display:flex;align-items:center;gap:7px;}
+  .hp-sub{font-size:11.5px;color:var(--secondary);margin:6px 0 8px;line-height:1.5;}
+  .hp-state{display:flex;align-items:center;gap:7px;font-size:11.5px;color:var(--secondary);}
+  .dot{width:8px;height:8px;border-radius:50%;background:var(--theirs);display:inline-block;flex:none;}
+
+  .tabbar{height:82px;border-radius:28px;margin:0 10px 12px;display:flex;align-items:center;padding:8px;gap:6px;flex:none;}
+  .tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10.5px;color:var(--secondary);cursor:pointer;background:transparent;border:none;padding:8px 4px;border-radius:20px;transition:background .2s,color .2s;}
+  .tab.on{color:var(--brand);font-weight:600;background:color-mix(in srgb,var(--brand) 16%,var(--glass-bg-strong));box-shadow:inset 0 1px 0 rgba(255,255,255,.5),0 4px 14px -4px rgba(20,40,90,.3);}
+  body[data-theme=dark] .tab.on{background:color-mix(in srgb,var(--brand) 22%,var(--glass-bg-strong));box-shadow:inset 0 1px 0 rgba(255,255,255,.14),0 4px 14px -4px rgba(0,0,0,.6);}
+  .tab svg{width:25px;height:25px;}
+
+  /* 会话页 */
+  .conv-top{display:flex;align-items:center;gap:10px;padding:2px 16px 8px;flex:none;}
+  .round-btn{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex:none;cursor:pointer;color:var(--label);
+    background:var(--glass-bg);backdrop-filter:blur(20px) saturate(1.8);-webkit-backdrop-filter:blur(20px) saturate(1.8);
+    border:.6px solid var(--glass-border);box-shadow:inset 0 1px 0 rgba(255,255,255,.5),0 4px 12px -4px rgba(20,40,90,.22);}
+  .conv-title h3{font-size:16.5px;font-weight:700;}
+  .conv-title p{font-size:10.5px;color:var(--secondary);margin-top:1px;display:flex;align-items:center;gap:4px;}
+
+  .status-strip{padding:0 16px 8px;display:flex;align-items:center;gap:10px;flex:none;}
+  .status-text{font-size:12px;color:var(--secondary);width:56px;flex:none;}
+  .wave{display:flex;align-items:center;gap:2.5px;height:38px;flex:1;}
+  .wave i{width:3px;border-radius:2px;background:var(--brand);display:block;transition:height .08s linear;}
+  .mic-toggle{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;flex:none;color:var(--label);
+    background:var(--glass-bg);backdrop-filter:blur(20px) saturate(1.8);-webkit-backdrop-filter:blur(20px) saturate(1.8);
+    border:.6px solid var(--glass-border);box-shadow:inset 0 1px 0 rgba(255,255,255,.5),0 4px 10px -4px rgba(20,40,90,.22);}
+  .mic-toggle.live{color:#fff;background:var(--red);border-color:transparent;}
+
+  .chat{flex:1;overflow-y:auto;padding:4px 14px;display:flex;flex-direction:column;gap:12px;}
+  .bubble-row{display:flex;align-items:center;gap:7px;animation:pop .25s ease;}
+  @keyframes pop{from{opacity:0;transform:translateY(8px) scale(.97);}to{opacity:1;transform:none;}}
+  .bubble-row.me{justify-content:flex-end;}
+  .bubble{max-width:76%;border-radius:19px;padding:9px 14px;
+    background:color-mix(in srgb,var(--mc,#1e73ef) 13%,var(--glass-bg-strong));
+    border:.6px solid color-mix(in srgb,var(--mc,#1e73ef) 22%,transparent);
+    backdrop-filter:blur(14px) saturate(1.6);-webkit-backdrop-filter:blur(14px) saturate(1.6);}
+  body[data-theme=dark] .bubble{background:color-mix(in srgb,var(--mc,#1e73ef) 22%,rgba(20,26,40,.55));}
+  .bubble.me{--mc:var(--mine);} .bubble.them{--mc:var(--theirs);}
+  .bubble .src{font-size:12.5px;color:var(--secondary);margin-bottom:2px;}
+  .bubble .dst{font-size:16.5px;font-weight:700;line-height:1.3;}
+  .bubble .dst.pending{color:var(--secondary);font-weight:600;}
+  .play-btn{width:40px;height:40px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;cursor:pointer;
+    color:var(--label);
+    background:color-mix(in srgb,var(--pc,var(--brand)) 16%,var(--glass-bg));
+    backdrop-filter:blur(20px) saturate(1.8);-webkit-backdrop-filter:blur(20px) saturate(1.8);
+    border:.6px solid var(--glass-border);box-shadow:inset 0 1px 0 rgba(255,255,255,.5),0 4px 10px -4px rgba(20,40,90,.2);}
+  .play-btn svg{width:18px;height:18px;}
+  .play-btn:active{transform:scale(.9);}
+  .play-btn.playing{color:#fff;background:var(--pc,var(--brand));border-color:transparent;}
+  .bubble-row.me .play-btn{order:0;} .bubble-row.me .bubble{order:1;}
+  .bubble-row.them .play-btn{--pc:var(--theirs);}
+  .bubble-row.me .play-btn{--pc:var(--mine);}
+
+  .empty{margin:auto;text-align:center;color:var(--secondary);padding:0 30px;display:flex;flex-direction:column;align-items:center;gap:10px;}
+  .empty .ei{width:56px;height:56px;color:var(--tertiary);}
+  .empty h4{font-size:16px;color:var(--label);}
+  .empty p{font-size:12.5px;line-height:1.5;}
+
+  .demo-row{display:flex;gap:9px;padding:8px 14px 2px;flex:none;}
+  .demo-chip{flex:1;border:.6px solid var(--glass-border);border-radius:24px;padding:10px 0;font-size:12.5px;font-weight:600;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;gap:6px;
+    backdrop-filter:blur(20px) saturate(1.8);-webkit-backdrop-filter:blur(20px) saturate(1.8);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.5),0 4px 12px -5px rgba(20,40,90,.22);}
+  .demo-chip:active{opacity:.7;}
+  .demo-chip.me{color:var(--brand);background:color-mix(in srgb,var(--brand) 15%,var(--glass-bg));}
+  .demo-chip.them{color:var(--theirs);background:color-mix(in srgb,var(--theirs) 16%,var(--glass-bg));}
+  .demo-chip:disabled{opacity:.35;cursor:default;}
+
+  .controlbar{height:88px;margin:8px 10px 10px;border-radius:30px;
+    display:grid;grid-template-columns:1fr auto 1fr;align-items:center;
+    padding:0 30px;flex:none;}
+  .ctrl{width:58px;height:58px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;
+    backdrop-filter:blur(20px) saturate(1.8);-webkit-backdrop-filter:blur(20px) saturate(1.8);
+    border:.6px solid var(--glass-border);box-shadow:inset 0 1px 0 rgba(255,255,255,.5),0 4px 14px -5px rgba(20,40,90,.25);}
+  .ctrl:active{transform:scale(.92);}
+  .ctrl.flush{justify-self:start;color:var(--brand);background:color-mix(in srgb,var(--brand) 16%,var(--glass-bg));}
+  .ctrl.stop{justify-self:center;width:68px;height:68px;color:var(--red);background:color-mix(in srgb,var(--red) 16%,var(--glass-bg));}
+
+  /* 记录 */
+  .list-wrap{flex:1;overflow-y:auto;padding:0 16px 12px;}
+  .hist{border-radius:18px;padding:13px 15px;margin-bottom:10px;display:flex;align-items:center;gap:10px;cursor:pointer;
+    background:var(--glass-bg);backdrop-filter:blur(20px) saturate(1.8);-webkit-backdrop-filter:blur(20px) saturate(1.8);
+    border:.6px solid var(--glass-border);box-shadow:inset 0 1px 0 rgba(255,255,255,.5),0 4px 12px -5px rgba(20,40,90,.18);}
+  .hist:active{opacity:.7;}
+  .hist-ico{width:38px;height:38px;border-radius:11px;flex:none;display:flex;align-items:center;justify-content:center;
+    background:color-mix(in srgb,var(--brand) 16%,var(--glass-bg));color:var(--brand);
+    backdrop-filter:blur(14px) saturate(1.6);-webkit-backdrop-filter:blur(14px) saturate(1.6);}
+  .hist-main{flex:1;min-width:0;}
+  .hist-main h4{font-size:15px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .hist-meta{display:flex;gap:12px;margin-top:4px;font-size:11.5px;color:var(--secondary);}
+  .hist-del{border:none;color:var(--red);cursor:pointer;padding:8px;border-radius:10px;background:transparent;display:flex;
+    backdrop-filter:blur(14px) saturate(1.6);-webkit-backdrop-filter:blur(14px) saturate(1.6);}
+  .hist-del:active{background:color-mix(in srgb,var(--red) 12%,var(--glass-bg));}
+
+  .detail-list{flex:1;overflow-y:auto;padding:6px 14px;display:flex;flex-direction:column;gap:10px;}
+
+  /* 设置 */
+  .form-scroll{flex:1;overflow-y:auto;padding:0 0 4px;}
+  .group{margin:12px 16px 0;border-radius:18px;overflow:hidden;
+    background:var(--glass-bg);backdrop-filter:blur(20px) saturate(1.8);-webkit-backdrop-filter:blur(20px) saturate(1.8);
+    border:.6px solid var(--glass-border);box-shadow:inset 0 1px 0 rgba(255,255,255,.5),0 4px 14px -6px rgba(20,40,90,.18);}
+  .group-title{font-size:12.5px;color:var(--secondary);margin:16px 28px -4px;font-weight:600;}
+  .row{padding:12px 16px;display:flex;align-items:center;gap:10px;font-size:14.5px;border-bottom:.6px solid var(--hairline);cursor:pointer;}
+  .row:last-child{border-bottom:none;}
+  .row.nocursor{cursor:default;}
+  .row .val{margin-left:auto;font-size:13.5px;color:var(--secondary);display:flex;align-items:center;gap:5px;text-align:right;}
+  .row.note{display:block;font-size:11.5px;color:var(--secondary);line-height:1.6;cursor:default;}
+  .row svg.ico{width:18px;height:18px;color:var(--brand);flex:none;}
+  .slider-row{padding:11px 16px 13px;}
+  .slider-row .t{font-size:14px;margin-bottom:7px;}
+  .slider-row .t b{float:right;color:var(--secondary);font-weight:500;}
+  input[type=range]{width:100%;accent-color:var(--brand);height:22px;}
+  .seg{display:flex;background:var(--glass-bg);border-radius:11px;padding:2.5px;margin:10px 16px 0;
+    backdrop-filter:blur(20px) saturate(1.8);-webkit-backdrop-filter:blur(20px) saturate(1.8);
+    border:.6px solid var(--glass-border);box-shadow:inset 0 1px 0 rgba(255,255,255,.5);}
+  .seg button{flex:1;border:none;background:none;border-radius:9px;padding:8px 0;font-size:13px;font-weight:600;cursor:pointer;
+    color:var(--secondary);display:flex;align-items:center;justify-content:center;gap:5px;transition:background .2s;}
+  .seg button.sel{background:color-mix(in srgb,var(--brand) 16%,var(--glass-bg-strong));color:var(--brand);
+    backdrop-filter:blur(14px) saturate(1.6);-webkit-backdrop-filter:blur(14px) saturate(1.6);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.5),0 2px 8px -2px rgba(20,40,90,.25);}
+  .seg button svg{width:15px;height:15px;}
+
+  /* sheet */
+  #sheet-mask{position:absolute;inset:0;background:rgba(0,0,0,.3);z-index:80;opacity:0;pointer-events:none;transition:opacity .2s;}
+  #sheet-mask.show{opacity:1;pointer-events:auto;}
+  .sheet{position:absolute;left:8px;right:8px;bottom:8px;border-radius:24px;padding:8px 8px 22px;z-index:81;
+    transform:translateY(108%);transition:transform .28s cubic-bezier(.2,.85,.25,1);max-height:72%;display:flex;flex-direction:column;
+    background:var(--glass-bg);backdrop-filter:blur(40px) saturate(2);-webkit-backdrop-filter:blur(40px) saturate(2);
+    border:.6px solid var(--glass-border);box-shadow:inset 0 1px 0 rgba(255,255,255,.5),0 -10px 40px -10px rgba(0,0,0,.3);}
+  body[data-theme=dark] .sheet{box-shadow:inset 0 1px 0 rgba(255,255,255,.14),0 -10px 40px -10px rgba(0,0,0,.6);}
+  .sheet.show{transform:none;}
+  .sheet-title{text-align:center;font-size:13px;color:var(--secondary);padding:10px 0 8px;font-weight:600;}
+  .sheet-ops{border-radius:14px;overflow:hidden;overflow-y:auto;background:transparent;}
+  .sheet-opt{padding:14px 16px;font-size:16px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;border-bottom:.6px solid var(--hairline);transition:background .15s;}
+  .sheet-opt:active{background:color-mix(in srgb,var(--brand) 10%,var(--glass-bg-strong));}
+  .sheet-opt:last-child{border-bottom:none;}
+  .sheet-opt.sel{color:var(--brand);font-weight:700;}
+  .sheet-cancel{margin-top:8px;border-radius:14px;padding:14px;text-align:center;font-size:16px;font-weight:700;cursor:pointer;color:var(--red);border:none;width:100%;
+    background:color-mix(in srgb,var(--red) 12%,var(--glass-bg));
+    backdrop-filter:blur(20px) saturate(1.8);-webkit-backdrop-filter:blur(20px) saturate(1.8);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.5),0 4px 12px -5px rgba(0,0,0,.2);}
+
+  #toast{position:absolute;left:50%;bottom:120px;transform:translateX(-50%) translateY(20px);background:rgba(0,0,0,.82);color:#fff;
+    font-size:13px;padding:10px 18px;border-radius:20px;z-index:90;opacity:0;transition:.25s;max-width:80%;text-align:center;pointer-events:none;
+    backdrop-filter:blur(10px);}
+  #toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+  svg{display:block;}
+</style>
+</head>
+<body data-theme="light">
+<div class="backdrop">
+  <div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div><div class="blob b4"></div>
+</div>
+<div class="page-title">
+  <b>AirPodsTranslate · 可交互原型（Liquid Glass）</b>
+  <span>点模式卡片开始 · 每条译文旁可单独重播 · 深色模式在设置中切换</span>
+</div>
+<div class="stage">
+  <div class="phone"><div class="screen">
+    <div class="island"></div>
+
+    <div class="view active" id="view-tabs">
+      <div class="statusbar"><span>9:41</span><span class="batt"></span></div>
+      <div style="flex:1;display:flex;flex-direction:column;min-height:0;">
+        <div style="flex:1;overflow:hidden;position:relative;">
+          <div class="tab-page" id="page-home" style="position:absolute;inset:0;display:flex;flex-direction:column;">
+            <div class="nav-title">离线实时翻译</div>
+            <div class="scroll" id="home-scroll"></div>
+          </div>
+          <div class="tab-page" id="page-history" style="position:absolute;inset:0;display:none;flex-direction:column;">
+            <div class="nav-title">记录</div>
+            <div class="list-wrap" id="history-list"></div>
+          </div>
+          <div class="tab-page" id="page-settings" style="position:absolute;inset:0;display:none;flex-direction:column;">
+            <div class="nav-title">设置</div>
+            <div class="form-scroll" id="settings-list"></div>
+          </div>
+        </div>
+        <div class="tabbar glass">
+          <button class="tab on" data-tab="home"><span id="tab-i-home"></span>对话</button>
+          <button class="tab" data-tab="history"><span id="tab-i-history"></span>记录</button>
+          <button class="tab" data-tab="settings"><span id="tab-i-settings"></span>设置</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="view" id="view-conv">
+      <div class="statusbar"><span>9:41</span><span class="batt"></span></div>
+      <div class="conv-top">
+        <button class="round-btn glass" id="btn-exit"></button>
+        <div class="conv-title"><h3 id="conv-name">—</h3><p id="conv-route">—</p></div>
+      </div>
+      <div class="status-strip">
+        <span class="status-text" id="conv-status">待机</span>
+        <div class="wave" id="conv-wave"></div>
+        <button class="mic-toggle" id="btn-mic" title="用真实麦克风驱动电平"></button>
+      </div>
+      <div class="chat" id="conv-chat"></div>
+      <div class="demo-row">
+        <button class="demo-chip me" id="btn-say-me"><span class="dot" style="background:var(--brand)"></span><span id="i-say-me"></span>模拟我说话</button>
+        <button class="demo-chip them" id="btn-say-them"><span class="dot"></span><span id="i-say-them"></span>模拟对方说</button>
+      </div>
+      <div class="controlbar glass" id="conv-controls"></div>
+    </div>
+
+    <div class="view" id="view-detail">
+      <div class="statusbar"><span>9:41</span><span class="batt"></span></div>
+      <div class="conv-top">
+        <button class="round-btn glass" id="btn-detail-back" style="font-size:18px;font-weight:600">‹</button>
+        <div class="conv-title" style="flex:1;min-width:0;"><h3 id="detail-title" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">记录</h3></div>
+        <button class="round-btn glass" id="btn-detail-share"></button>
+      </div>
+      <div class="detail-list" id="detail-list"></div>
+      <div style="height:14px;flex:none;"></div>
+    </div>
+
+    <div id="sheet-mask"></div>
+    <div class="sheet glass" id="sheet">
+      <div class="sheet-title" id="sheet-title"></div>
+      <div class="sheet-ops" id="sheet-ops"></div>
+      <button class="sheet-cancel glass" id="sheet-cancel">取消</button>
+    </div>
+    <div id="toast"></div>
+  </div></div>
+</div>
+
+<script>
+"use strict";
+/* ============ Lucide 图标（ISC，lucide v1.52，内联 SVG 以支持离线 file://） ============ */
+const ICONS={
+  "messages-square":'<path d="M16 10a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 14.286V4a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/><path d="M20 9a2 2 0 0 1 2 2v10.286a.71.71 0 0 1-1.212.502l-2.202-2.202A2 2 0 0 0 17.172 19H10a2 2 0 0 1-2-2v-1"/>',
+  "ear":'<path d="M6 8.5a6.5 6.5 0 1 1 13 0c0 6-6 6-6 10a3.5 3.5 0 1 1-7 0"/><path d="M15 8.5a2.5 2.5 0 0 0-5 0v1a2 2 0 1 1 0 4"/>',
+  "play":'<path d="M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z"/>',
+  "volume-2":'<path d="M11 4.702a.705.705 0 0 0-1.203-.498L6.413 7.587A1.4 1.4 0 0 1 5.416 8H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2.416a1.4 1.4 0 0 1 .997.413l3.383 3.384A.705.705 0 0 0 11 19.298z"/><path d="M16 9a5 5 0 0 1 0 6"/><path d="M19.364 18.364a9 9 0 0 0 0-12.728"/>',
+  "scissors":'<circle cx="6" cy="6" r="3"/><path d="M8.12 8.12 12 12"/><path d="M20 4 8.12 15.88"/><circle cx="6" cy="18" r="3"/><path d="M14.8 14.8 20 20"/>',
+  "circle-stop":'<circle cx="12" cy="12" r="10"/><rect x="9" y="9" width="6" height="6" rx="1"/>',
+  "x":'<path d="M18 6 6 18"/><path d="m6 6 12 12"/>',
+  "check":'<path d="M20 6 9 17l-5-5"/>',
+  "mic":'<path d="M12 19v3"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><rect x="9" y="2" width="6" height="13" rx="3"/>',
+  "audio-lines":'<path d="M2 10v3"/><path d="M6 6v11"/><path d="M10 3v18"/><path d="M14 8v7"/><path d="M18 5v13"/><path d="M22 10v3"/>',
+  "trash":'<path d="M10 11v6"/><path d="M14 11v6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>',
+  "share":'<path d="M12 2v13"/><path d="m16 6-4-4-4 4"/><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/>',
+  "chevron-right":'<path d="m9 18 6-6-6-6"/>',
+  "swap":'<path d="M8 3 4 7l4 4"/><path d="M4 7h16"/><path d="m16 21 4-4-4-4"/><path d="M20 17H4"/>',
+  "history":'<path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/>',
+  "settings":'<path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"/><circle cx="12" cy="12" r="3"/>',
+  "headphones":'<path d="M3 14h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-7a9 9 0 0 1 18 0v7a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3"/>',
+  "moon":'<path d="M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401"/>',
+  "sun":'<circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/>',
+  "smartphone":'<rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><path d="M12 18h.01"/>',
+  "languages":'<path d="m5 8 6 6"/><path d="m4 14 6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="m22 22-5-10-5 10"/><path d="M14 18h6"/>',
+  "book":'<path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a1 1 0 0 1 0-5H20"/>',
+  "inbox":'<polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/>',
+  "sliders":'<line x1="4" x2="4" y1="21" y2="14"/><line x1="4" x2="4" y1="10" y2="3"/><line x1="12" x2="12" y1="21" y2="12"/><line x1="12" x2="12" y1="8" y2="3"/><line x1="20" x2="20" y1="21" y2="16"/><line x1="20" x2="20" y1="12" y2="3"/><line x1="2" x2="6" y1="14" y2="14"/><line x1="10" x2="14" y1="8" y2="8"/><line x1="18" x2="22" y1="16" y2="16"/>',
+  "cpu":'<rect width="16" height="16" x="4" y="4" rx="2"/><rect width="6" height="6" x="9" y="9" rx="1"/><path d="M15 2v2"/><path d="M15 20v2"/><path d="M2 15h2"/><path d="M2 9h2"/><path d="M20 15h2"/><path d="M20 9h2"/><path d="M9 2v2"/><path d="M9 20v2"/>'
+};
+const icon=(n,s=20,sw)=>`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${sw||2}" stroke-linecap="round" stroke-linejoin="round">${ICONS[n]||""}</svg>`;
+
+/* ============ 数据 ============ */
+const LANGS=[{code:"zh-Hans",label:"中文"},{code:"en",label:"English"},{code:"ja",label:"日本語"},{code:"ko",label:"한국어"},{code:"fr",label:"Français"},{code:"de",label:"Deutsch"},{code:"es",label:"Español"}];
+const STRATEGIES=[{v:"headsetMic",l:"耳机麦模式（HFP）"},{v:"highQuality",l:"高音质模式（A2DP+手机麦）"},{v:"speaker",l:"外放模式（手机扬声器）"}];
+const ASRS=[{v:"whisperKit",l:"WhisperKit（推荐）"},{v:"system",l:"系统识别器（省电）"}];
+const MTS=[{v:"apple",l:"Apple 离线翻译（推荐）"},{v:"argos",l:"Argos CoreML（实验，V2.0）"}];
+const SILENCES=[{v:0.4,l:"0.4 秒（快节奏）"},{v:0.6,l:"0.6 秒（默认）"},{v:0.8,l:"0.8 秒"},{v:1.0,l:"1.0 秒（慢节奏）"}];
+const PHRASES_ME=[
+  {zh:"请问最近的地铁站怎么走？",en:"Excuse me, how do I get to the nearest subway station?"},
+  {zh:"大概要走多久？",en:"About how long will it take to walk there?"},
+  {zh:"我想点一份牛肉面，不要香菜。",en:"I'd like a bowl of beef noodle soup, no cilantro please."},
+  {zh:"这个多少钱？可以刷卡吗？",en:"How much is this? Can I pay by card?"},
+  {zh:"麻烦帮我叫一辆出租车。",en:"Could you please call a taxi for me?"}];
+const PHRASES_THEM=[
+  {en:"Go straight and turn left at the second light.",zh:"直走，在第二个红绿灯左转。"},
+  {en:"It's about a ten-minute walk.",zh:"走路大约十分钟。"},
+  {en:"Sure, anything to drink?",zh:"好的，需要喝点什么吗？"},
+  {en:"That's twelve dollars.",zh:"一共十二美元。"},
+  {en:"Your taxi will arrive in five minutes.",zh:"您的出租车五分钟后到。"}];
+
+const defaultSettings={appearance:"system",myLang:"zh-Hans",theirLang:"en",lock:true,
+  strategy:"headsetMic",silence:0.6,translatedVol:1.0,tts:true,ttsRate:1.0,
+  asr:"whisperKit",mt:"apple",autoSave:true};
+let settings=loadJSON("apt_settings",defaultSettings);
+let conversations=loadJSON("apt_conversations",[]);
+const S={tab:"home",mode:null,running:false,status:"idle",messages:[],session:0,busy:false,meIdx:0,themIdx:0,detailId:null,micLive:false,playingId:null};
+
+function loadJSON(k,d){try{const v=JSON.parse(localStorage.getItem(k));
+  if(Array.isArray(d))return Array.isArray(v)?v:[...d];
+  return {...d,...(v||{})};}catch{return Array.isArray(d)?[...d]:{...d};}}
+function save(){localStorage.setItem("apt_settings",JSON.stringify(settings));}
+function saveConv(){localStorage.setItem("apt_conversations",JSON.stringify(conversations));}
+const $=id=>document.getElementById(id);
+const langLabel=c=>(LANGS.find(l=>l.code===c)||{label:c}).label;
+const stratLabel=v=>(STRATEGIES.find(s=>s.v===v)||{l:v}).l;
+
+/* ============ 主题（跟随系统/浅色/深色） ============ */
+const mq=window.matchMedia("(prefers-color-scheme: dark)");
+function applyTheme(){
+  const dark=settings.appearance==="dark"||(settings.appearance==="system"&&mq.matches);
+  document.body.dataset.theme=dark?"dark":"light";
+}
+mq.addEventListener?.("change",()=>{if(settings.appearance==="system")applyTheme();});
+applyTheme();
+
+/* ============ Toast / Sheet ============ */
+let toastTimer;
+function toast(m){const t=$("toast");t.textContent=m;t.classList.add("show");clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove("show"),1600);}
+function openSheet(title,options,current,onPick){
+  $("sheet-title").textContent=title;
+  $("sheet-ops").innerHTML=options.map(o=>`<div class="sheet-opt ${o.v===current?"sel":""}" data-v="${o.v}"><span>${o.l}</span>${o.v===current?icon("check",18):""}</div>`).join("")
+    .replace('<svg width="18"','<svg width="18" style="color:var(--brand)"');
+  $("sheet-mask").classList.add("show");$("sheet").classList.add("show");
+  $("sheet-ops").querySelectorAll(".sheet-opt").forEach(el=>el.onclick=()=>{
+    const v=options.find(o=>String(o.v)===el.dataset.v);closeSheet();onPick(v);});
+}
+function closeSheet(){$("sheet-mask").classList.remove("show");$("sheet").classList.remove("show");}
+$("sheet-mask").onclick=closeSheet;$("sheet-cancel").onclick=closeSheet;
+
+/* ============ 视图/Tab ============ */
+function show(v){document.querySelectorAll(".view").forEach(x=>x.classList.remove("active"));$(v).classList.add("active");}
+document.querySelectorAll(".tab").forEach(btn=>btn.onclick=()=>{
+  S.tab=btn.dataset.tab;
+  document.querySelectorAll(".tab").forEach(b=>b.classList.toggle("on",b===btn));
+  ["home","history","settings"].forEach(t=>$("page-"+t).style.display=t===S.tab?"flex":"none");
+  if(S.tab==="history")renderHistory();
+  if(S.tab==="settings")renderSettings();
+});
+
+/* ============ 首页 ============ */
+function renderHome(){
+  $("home-scroll").innerHTML=`
+    <div class="card glass">
+      <div class="lang-row">
+        <div class="lang-box"><div class="lbl">我说</div>
+          <div class="lang-pick" id="pick-my"><span>${langLabel(settings.myLang)}</span><span class="chev">${icon("chevron-right",16)}</span></div></div>
+        <div class="swap" id="btn-swap">${icon("swap",18)}</div>
+        <div class="lang-box"><div class="lbl">对方说</div>
+          <div class="lang-pick" id="pick-their"><span>${langLabel(settings.theirLang)}</span><span class="chev">${icon("chevron-right",16)}</span></div></div>
+      </div>
+      <div class="toggle-row"><span>锁定语种（提高识别准确率）</span><div class="switch ${settings.lock?"on":"off"}" id="sw-lock"></div></div>
+    </div>
+    <div class="card glass mode-card" data-mode="conversation">
+      <div class="mode-ico">${icon("messages-square",25)}</div>
+      <div class="mode-text"><h3>面对面对话</h3><p>手机外放 / 耳机双栏字幕</p></div>
+      <span class="chev">${icon("chevron-right",18)}</span></div>
+    <div class="card glass mode-card" data-mode="listening">
+      <div class="mode-ico">${icon("ear",25)}</div>
+      <div class="mode-text"><h3>同声聆听</h3><p>只听不说，译文进耳机</p></div>
+      <span class="chev">${icon("chevron-right",18)}</span></div>
+    <div class="card glass">
+      <div class="hp-title">${icon("headphones",18)}适配耳机</div>
+      <div class="hp-sub">AirPods Pro 2 及以上、AirPods 4、AirPods 3 · 系统 iOS 26 及以上</div>
+      <div class="hp-state"><span class="dot"></span>当前：AirPods Pro（HFP 已连接 · 16kHz 宽带语音）</div>
+    </div>`;
+  $("pick-my").onclick=()=>openSheet("我的语言",LANGS.map(l=>({v:l.code,l:l.label})),settings.myLang,o=>{settings.myLang=o.v;save();renderHome();});
+  $("pick-their").onclick=()=>openSheet("对方语言",LANGS.map(l=>({v:l.code,l:l.label})),settings.theirLang,o=>{settings.theirLang=o.v;save();renderHome();});
+  $("btn-swap").onclick=()=>{[settings.myLang,settings.theirLang]=[settings.theirLang,settings.myLang];save();renderHome();};
+  $("sw-lock").onclick=()=>{settings.lock=!settings.lock;save();renderHome();};
+  document.querySelectorAll("[data-mode]").forEach(el=>el.onclick=()=>enterConversation(el.dataset.mode));
+}
+
+/* ============ 会话 ============ */
+const MODE_META={conversation:{name:"面对面对话",ico:"messages-square"},listening:{name:"同声聆听",ico:"ear"}};
+function enterConversation(mode){
+  S.mode=mode;S.running=true;S.status="listening";S.messages=[];S.session++;S.busy=false;S.playingId=null;
+  stopMic();
+  $("conv-name").textContent=MODE_META[mode].name;
+  $("conv-route").innerHTML=`${icon("headphones",12)}AirPods Pro · ${mode==="listening"?"耳机麦 HFP":stratLabel(settings.strategy)}`;
+  renderControls();renderChat();updateStatus();
+  show("view-conv");
+}
+function exitConversation(saveHistory){
+  const had=S.messages.length>0;
+  if(saveHistory&&had&&settings.autoSave){
+    conversations.unshift({id:Date.now(),title:S.messages[0].source,time:Date.now(),mode:S.mode,
+      messages:S.messages.map(m=>({side:m.side,source:m.source,translation:m.translation}))});
+    saveConv();
+  }
+  S.running=false;S.session++;stopMic();speechCancel();
+  show("view-tabs");
+}
+$("btn-exit").onclick=()=>exitConversation(true);
+
+function renderControls(){
+  $("conv-controls").innerHTML=`
+    <button class="ctrl flush" id="c-flush" title="手动截句">${icon("scissors",22)}</button>
+    <button class="ctrl stop" id="c-stop" title="结束会话">${icon("circle-stop",26)}</button>`;
+  $("c-flush").onclick=()=>toast("已手动截句");
+  $("c-stop").onclick=()=>exitConversation(true);
+}
+
+function renderChat(){
+  const c=$("conv-chat");
+  if(!S.messages.length){
+    const empty={conversation:["戴上 AirPods，开始说话即可","系统自动分栏，译文朗读并显示双语字幕"],
+      listening:["把手机放兜里，戴着耳机听即可","对方说完后译文自动在耳机朗读"]}[S.mode];
+    c.innerHTML=`<div class="empty"><span class="ei">${icon(S.mode==="listening"?"ear":"messages-square",56)}</span>
+      <h4>${empty[0]}</h4><p>${empty[1]}</p></div>`;
+    return;
+  }
+  c.innerHTML=S.messages.map(m=>`
+    <div class="bubble-row ${m.side}">
+      <button class="play-btn ${S.playingId===m.id?"playing":""}" data-play="${m.id}" title="重新播放">
+        ${S.playingId===m.id?icon("volume-2",16):icon("play",15)}
+      </button>
+      <div class="bubble ${m.side}">
+        <div class="src">${m.source}</div>
+        <div class="dst ${m.pending?"pending":""}">${m.translation||"翻译中…"}</div>
+      </div>
+    </div>`).join("");
+  c.scrollTop=c.scrollHeight;
+  c.querySelectorAll("[data-play]").forEach(b=>b.onclick=()=>{
+    const m=S.messages.find(x=>String(x.id)===b.dataset.play);
+    if(m&&m.translation)replayMessage(m);
+  });
+}
+
+function updateStatus(){
+  const map={idle:"待机",listening:"聆听中",processing:"识别翻译中",speaking:"朗读中"};
+  $("conv-status").textContent=map[S.status]||"…";
+}
+
+/* ============ 模拟说话管线 ============ */
+$("btn-say-me").onclick=()=>simulate("me");
+$("btn-say-them").onclick=()=>simulate("them");
+const wait=ms=>new Promise(r=>setTimeout(r,ms));
+async function simulate(side){
+  if(!S.running||S.busy)return;
+  const sid=S.session;
+  S.busy=true;setChips(true);
+  const pair=side==="me"?PHRASES_ME[S.meIdx++%PHRASES_ME.length]:PHRASES_THEM[S.themIdx++%PHRASES_THEM.length];
+  const source=side==="me"?pair.zh:pair.en;
+  const translation=side==="me"?pair.en:pair.zh;
+
+  S.status="listening";updateStatus();
+  await wait(350+settings.silence*250);if(sid!==S.session)return;
+  S.status="processing";updateStatus();
+  const msg={id:++S.__idSeq||(S.__idSeq=1),side,source,translation:"",pending:true};
+  S.messages.push(msg);renderChat();
+  await wait(750);if(sid!==S.session)return;
+  msg.translation=translation;msg.pending=false;renderChat();
+
+  if(settings.tts){await speakMessage(msg,sid);if(sid!==S.session)return;}
+  S.status="listening";S.busy=false;setChips(false);updateStatus();
+}
+function setChips(d){$("btn-say-me").disabled=d;$("btn-say-them").disabled=d;}
+
+/* ============ TTS ============ */
+const ttsLang=side=>side==="me"?"en-US":"zh-CN";
+let voices=[];
+function loadVoices(){voices=speechSynthesis.getVoices();}
+loadVoices();speechSynthesis.onvoiceschanged=loadVoices;
+function speechCancel(){try{speechSynthesis.cancel();}catch{}}
+function speakMessage(m,sid){
+  return new Promise(resolve=>{
+    if(!("speechSynthesis" in window)){resolve();return;}
+    speechCancel();
+    S.playingId=m.id;renderChat();updateStatus();S.status="speaking";updateStatus();
+    const lang=ttsLang(m.side);
+    const u=new SpeechSynthesisUtterance(m.translation);
+    u.lang=lang;
+    const v=voices.find(x=>x.lang&&x.lang.toLowerCase().startsWith(lang.split("-")[0]));
+    if(v)u.voice=v;
+    u.rate=settings.ttsRate;u.volume=Math.max(.1,settings.translatedVol);
+    let done=false;
+    const finish=()=>{if(done)return;done=true;S.playingId=null;if(sid===S.session){renderChat();}resolve();};
+    u.onend=finish;u.onerror=finish;
+    speechSynthesis.speak(u);
+    setTimeout(finish,Math.max(1400,m.translation.length*65));
+  });
+}
+function replayMessage(m){
+  if(S.busy){toast("请等当前这句说完");return;}
+  const sid=S.session;S.busy=true;setChips(true);S.status="speaking";updateStatus();
+  speakMessage(m,sid).then(()=>{if(sid===S.session){S.status="listening";S.busy=false;setChips(false);updateStatus();}});
+}
+
+/* ============ 麦克风电平 ============ */
+let audioCtx,analyser,micStream,rafMic,micLevel=0;
+async function toggleMic(){
+  if(S.micLive){stopMic();return;}
+  try{
+    micStream=await navigator.mediaDevices.getUserMedia({audio:true});
+    audioCtx=new (window.AudioContext||window.webkitAudioContext)();
+    const src=audioCtx.createMediaStreamSource(micStream);
+    analyser=audioCtx.createAnalyser();analyser.fftSize=256;src.connect(analyser);
+    const buf=new Uint8Array(analyser.fftSize);
+    S.micLive=true;$("btn-mic").classList.add("live");
+    (function loop(){
+      if(!S.micLive)return;
+      analyser.getByteTimeDomainData(buf);
+      let sum=0;for(let i=0;i<buf.length;i++){const v=(buf[i]-128)/128;sum+=v*v;}
+      micLevel=Math.min(1,Math.sqrt(sum/buf.length)*5);
+      rafMic=requestAnimationFrame(loop);
+    })();
+    toast("已用真实麦克风驱动波形");
+  }catch{toast("麦克风不可用，使用模拟波形");}
+}
+function stopMic(){
+  S.micLive=false;$("btn-mic")?.classList.remove("live");
+  cancelAnimationFrame(rafMic);
+  micStream?.getTracks().forEach(t=>t.stop());audioCtx?.close();
+  audioCtx=null;micStream=null;micLevel=0;
+}
+$("btn-mic").onclick=toggleMic;
+
+/* ============ 波形 ============ */
+const waveBars=Array.from({length:24},()=>{const b=document.createElement("i");$("conv-wave").appendChild(b);return b;});
+const heights=new Array(24).fill(.05);
+function waveLoop(t){
+  requestAnimationFrame(waveLoop);
+  for(let i=0;i<24;i++){
+    let target,dist=Math.abs(i-11.5)/11.5,env=1-dist*.55;
+    if(!S.running)target=.05;
+    else if(S.micLive)target=micLevel*env*(.7+Math.random()*.5);
+    else if(S.status==="listening")target=Math.random()*.85*env+.04;
+    else if(S.status==="speaking")target=(.55+.45*Math.sin(t/130+i))*env;
+    else if(S.status==="processing")target=.25+.12*Math.sin(t/300+i*.6);
+    else target=.05;
+    heights[i]+=(Math.max(.04,target)-heights[i])*.35;
+    waveBars[i].style.height=(5+heights[i]*34)+"px";
+  }
+}
+requestAnimationFrame(waveLoop);
+
+/* ============ 记录 ============ */
+function renderHistory(){
+  const el=$("history-list");
+  if(!conversations.length){
+    el.innerHTML=`<div style="text-align:center;color:var(--secondary);margin-top:110px;display:flex;flex-direction:column;align-items:center;gap:12px;">
+      <span style="width:52px;height:52px;color:var(--tertiary)">${icon("inbox",52)}</span>
+      <div><div style="font-size:15px;font-weight:600;color:var(--label)">暂无对话记录</div>
+      <div style="font-size:12px;margin-top:4px;">完成并退出的会话会保存在这里（本机存储）</div></div></div>`;
+    return;
+  }
+  el.innerHTML=conversations.map(c=>{
+    const d=new Date(c.time);
+    const time=`${d.getMonth()+1}月${d.getDate()}日 ${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`;
+    return `<div class="hist glass" data-id="${c.id}">
+      <span class="hist-ico">${icon("messages-square",19)}</span>
+      <div class="hist-main"><h4>${c.title}</h4>
+        <div class="hist-meta"><span>${c.messages.length} 句 · ${MODE_META[c.mode].name}</span><span>${time}</span></div></div>
+      <button class="hist-del" data-del="${c.id}">${icon("trash",19)}</button></div>`;
+  }).join("");
+  el.querySelectorAll(".hist").forEach(h=>h.onclick=e=>{if(!e.target.closest("[data-del]"))openDetail(Number(h.dataset.id));});
+  el.querySelectorAll("[data-del]").forEach(b=>b.onclick=e=>{
+    e.stopPropagation();
+    conversations=conversations.filter(c=>c.id!==Number(b.dataset.del));saveConv();renderHistory();toast("已删除");
+  });
+}
+function openDetail(id){
+  const c=conversations.find(x=>x.id===id);if(!c)return;
+  S.detailId=id;$("detail-title").textContent=c.title;
+  $("detail-list").innerHTML=c.messages.map(m=>`
+    <div class="bubble-row ${m.side}">
+      <button class="play-btn ${m.side}" data-rp="${m.side}${c.messages.indexOf(m)}">${icon("play",15)}</button>
+      <div class="bubble ${m.side}"><div class="src">${m.source}</div><div class="dst">${m.translation}</div></div>
+    </div>`).join("");
+  $("detail-list").querySelectorAll("[data-rp]").forEach((b,i)=>b.onclick=()=>{
+    const m=c.messages[i];
+    speechCancel();
+    const u=new SpeechSynthesisUtterance(m.translation);
+    u.lang=m.side==="me"?"en-US":"zh-CN";u.rate=settings.ttsRate;
+    b.classList.add("playing");b.innerHTML=icon("volume-2",16);
+    u.onend=reset;u.onerror=reset;
+    speechSynthesis.speak(u);
+    function reset(){b.classList.remove("playing");b.innerHTML=icon("play",15);}
+  });
+  show("view-detail");
+}
+$("btn-detail-back").onclick=()=>show("view-tabs");
+$("btn-detail-share").onclick=()=>{
+  const c=conversations.find(x=>x.id===S.detailId);if(!c)return;
+  const txt=c.messages.map(m=>`[${m.side==="me"?"我":"对方"}] ${m.source}\n  → ${m.translation}`).join("\n\n");
+  if(navigator.clipboard)navigator.clipboard.writeText(txt).then(()=>toast("已复制全文，可粘贴分享"),()=>toast("复制失败"));
+};
+
+/* ============ 设置 ============ */
+function renderSettings(){
+  const el=$("settings-list");
+  const seg=a=>`<div class="seg">
+    <button data-a="system" class="${a==="system"?"sel":""}">${icon("smartphone",15)}跟随系统</button>
+    <button data-a="light" class="${a==="light"?"sel":""}">${icon("sun",15)}浅色</button>
+    <button data-a="dark" class="${a==="dark"?"sel":""}">${icon("moon",15)}深色</button></div>`;
+  el.innerHTML=`
+   ${seg(settings.appearance)}
+   <div class="group-title">语言</div>
+   <div class="group glass">
+     <div class="row" id="s-my">${icon("languages",18)}<span>我的语言</span><span class="val">${langLabel(settings.myLang)} ${icon("chevron-right",15)}</span></div>
+     <div class="row" id="s-their">${icon("messages-square",18)}<span>对方语言</span><span class="val">${langLabel(settings.theirLang)} ${icon("chevron-right",15)}</span></div>
+     <div class="row nocursor" id="s-lock"><span>锁定语种</span><span class="val" id="s-lock-v"></span></div>
+   </div>
+   <div class="group-title">音频</div>
+   <div class="group glass">
+     <div class="row" id="s-strategy">${icon("headphones",18)}<span>对话模式路由</span><span class="val">${stratLabel(settings.strategy)} ${icon("chevron-right",15)}</span></div>
+     <div class="row" id="s-silence">${icon("audio-lines",18)}<span>句末静音时长</span><span class="val">${settings.silence} 秒 ${icon("chevron-right",15)}</span></div>
+   </div>
+   <div class="group-title">朗读</div>
+   <div class="group glass">
+     <div class="row nocursor"><span>自动朗读译文</span><span class="val" id="s-tts-v"></span></div>
+     <div class="slider-row"><div class="t">语速 <b>${Math.round(settings.ttsRate*100)}%</b></div>
+       <input type="range" min="0.6" max="1.4" step="0.05" value="${settings.ttsRate}" id="sl-rate"></div>
+     <div class="slider-row"><div class="t">译文耳机音量 <b>${Math.round(settings.translatedVol*100)}%</b></div>
+       <input type="range" min="0.3" max="1" step="0.05" value="${settings.translatedVol}" id="sl-tv"></div>
+   </div>
+   <div class="group-title">离线引擎</div>
+   <div class="group glass">
+     <div class="row" id="s-asr">${icon("cpu",18)}<span>语音识别 ASR</span><span class="val">${ASRS.find(a=>a.v===settings.asr).l} ${icon("chevron-right",15)}</span></div>
+     <div class="row" id="s-mt">${icon("languages",18)}<span>翻译 MT</span><span class="val">${MTS.find(a=>a.v===settings.mt).l} ${icon("chevron-right",15)}</span></div>
+     <div class="row" id="s-glossary">${icon("book",18)}<span>术语库</span><span class="val">${icon("chevron-right",15)}</span></div>
+     <div class="row note">语言包首次使用时由系统引导下载，下载后永久离线；WhisperKit 模型走 App 内一次性下载。</div>
+   </div>
+   <div class="group-title">数据</div>
+   <div class="group glass">
+     <div class="row nocursor"><span>自动保存对话记录</span><span class="val" id="s-save-v"></span></div>
+     <div class="row" id="s-clear">${icon("trash",18)}<span style="color:var(--red)">清空全部记录</span></div>
+   </div>
+   <div class="group-title">关于</div>
+   <div class="group glass"><div class="row note">适配：AirPods Pro 2 及以上、AirPods 4、AirPods 3<br>系统：iOS 26 及以上 · 液态玻璃界面<br>零联网 · 零订阅 · 无服务器</div></div>
+   <div style="height:12px"></div>`;
+
+  el.querySelectorAll("[data-a]").forEach(b=>b.onclick=()=>{settings.appearance=b.dataset.a;save();applyTheme();renderSettings();});
+  const sw=(id,key)=>{$(id).innerHTML=`<div class="switch ${settings[key]?"on":"off"}"></div>`;$(id).onclick=()=>{settings[key]=!settings[key];save();renderSettings();};};
+  sw("s-lock-v","lock");sw("s-tts-v","tts");sw("s-save-v","autoSave");
+  $("s-my").onclick=()=>openSheet("我的语言",LANGS.map(l=>({v:l.code,l:l.label})),settings.myLang,o=>{settings.myLang=o.v;save();renderSettings();});
+  $("s-their").onclick=()=>openSheet("对方语言",LANGS.map(l=>({v:l.code,l:l.label})),settings.theirLang,o=>{settings.theirLang=o.v;save();renderSettings();});
+  $("s-strategy").onclick=()=>openSheet("路由策略",STRATEGIES,settings.strategy,o=>{settings.strategy=o.v;save();renderSettings();});
+  $("s-silence").onclick=()=>openSheet("句末静音",SILENCES,settings.silence,o=>{settings.silence=o.v;save();renderSettings();});
+  $("s-asr").onclick=()=>openSheet("识别引擎",ASRS,settings.asr,o=>{settings.asr=o.v;save();renderSettings();});
+  $("s-mt").onclick=()=>openSheet("翻译引擎",MTS,settings.mt,o=>{if(o.v==="argos")toast("Argos 引擎为 V2.0 实验项，将回退 Apple 翻译");settings.mt=o.v;save();renderSettings();});
+  $("s-glossary").onclick=()=>toast("术语库：术语管理页（开发中样式）");
+  $("s-clear").onclick=()=>{if(conversations.length){conversations=[];saveConv();toast("记录已清空");}else toast("暂无记录");};
+  [["sl-rate","ttsRate"],["sl-tv","translatedVol"]].forEach(([id,key])=>{
+    $(id).oninput=e=>{settings[key]=parseFloat(e.target.value);save();
+      e.target.previousElementSibling.querySelector("b").textContent=Math.round(settings[key]*100)+"%";};
+  });
+}
+
+/* ============ 静态图标注入 ============ */
+$("tab-i-home").innerHTML=icon("messages-square",25);
+$("tab-i-history").innerHTML=icon("history",25);
+$("tab-i-settings").innerHTML=icon("settings",25);
+$("btn-exit").innerHTML=icon("x",18);
+$("btn-mic").innerHTML=icon("mic",18);
+$("i-say-me").outerHTML=icon("mic",15);
+$("i-say-them").outerHTML=icon("audio-lines",15);
+$("btn-detail-share").innerHTML=icon("share",18);
+
+/* ============ 自适应缩放 ============ */
+function fit(){
+  const h=window.innerHeight-74,w=window.innerWidth-24;
+  const s=Math.min(w/390,h/844,1.15);
+  document.querySelector(".phone").style.transform=`scale(${s})`;
+  document.querySelector(".page-title").style.display=window.innerHeight<760?"none":"block";
+}
+window.addEventListener("resize",fit);
+
+renderHome();fit();
+</script>
+</body>
+</html>
