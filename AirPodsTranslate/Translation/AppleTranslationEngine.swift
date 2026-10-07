@@ -125,10 +125,14 @@ private struct TranslationSessionBridge: ViewModifier {
             .onAppear { _ = engine.configVersion }
             .translationTask(engine.configuration) { session in
                 engine.attach(session: session)
-                // task 取消（语言对变化/视图消失）时解绑
+                // task 取消（语言对变化/视图消失）时解绑：
+                // 用一个永不产生元素的 AsyncStream 挂起，取消时 finish 结束等待。
+                // 切勿用 Task.sleep(.seconds(Int.max))：超大 Duration 在新系统运行时会断言崩溃。
+                let (parkStream, parkContinuation) = AsyncStream<Void>.makeStream()
                 await withTaskCancellationHandler {
-                    try? await Task.sleep(for: .seconds(Int.max))
+                    for await _ in parkStream { }
                 } onCancel: {
+                    parkContinuation.finish()
                     engine.detach()
                 }
             }
