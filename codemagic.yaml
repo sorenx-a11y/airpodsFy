@@ -4,10 +4,7 @@ workflows:
     environment:
       xcode: 16.0
       cocoapods: default
-      groups:
-        - app_store_credentials
       vars:
-        BUNDLE_ID: "com.sorenx.airpodsfy"
         XCODE_PROJECT: "AirPodsTranslate.xcodeproj"
         XCODE_SCHEME: "AirPodsTranslate"
     scripts:
@@ -15,24 +12,14 @@ workflows:
         script: brew install xcodegen
       - name: Generate Xcode project
         script: xcodegen generate
-      - name: Set up code signing
-        script: |
-          keychain initialize
-          keychain add-certificates
-          xcode-project use-profiles
       - name: Resolve Swift Package dependencies
         script: xcodebuild -project "$XCODE_PROJECT" -scheme "$XCODE_SCHEME" -resolvePackageDependencies
-      - name: Build IPA
+      - name: Build for simulator (no signing required)
         script: |
-          xcode-project build-ipa \
-            --project "$XCODE_PROJECT" \
-            --scheme "$XCODE_SCHEME" \
-            --archive-xcargs "CODE_SIGN_STYLE=Manual DEVELOPMENT_TEAM=$DEVELOPER_TEAM"
+          xcodebuild build \
+            -project "$XCODE_PROJECT" \
+            -scheme "$XCODE_SCHEME" \
+            -destination 'platform=iOS Simulator,name=iPhone 16' \
+            -destination 'generic/platform=iOS Simulator'
     artifacts:
-      - build/ios/ipa/*.ipa
-      - $HOME/Library/Developer/Xcode/DerivedData/**/Build/**/*.dSYM
-    publishing:
-      app_store_connect:
-        api_key: $APP_STORE_CONNECT_API_KEY
-        key_id: $APP_STORE_CONNECT_KEY_IDENTIFIER
-        issuer_id: $APP_STORE_CONNECT_ISSUER_ID
+      - $HOME/Library/Developer/Xcode/DerivedData/**/Build/**/*.app
